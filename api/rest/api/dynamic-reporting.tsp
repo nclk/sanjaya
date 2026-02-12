@@ -139,14 +139,11 @@ namespace DynamicReporting {
         | CustomErrorResponse400
         | CustomErrorResponse404
         | ValidationErrorResponse;
-      @route("/pivot/preview")
-      @doc("Preview server-side pivot result for a dataset")
+      @route("/pivot")
+      @doc("AG Grid Server-Side Row Model endpoint — handles grouping, pivoting, filtering, sorting, and pagination")
       @post
-      op pivotPreview(
-        @path datasetKey: string,
-        @body body: PivotPreviewRequest,
-      ):
-        | PivotPreviewResponse
+      op pivot(@path datasetKey: string, @body body: ServerSideGetRowsRequest):
+        | ServerSideGetRowsResponse
         | CustomErrorResponse501
         | CustomErrorResponse400
         | CustomErrorResponse404
