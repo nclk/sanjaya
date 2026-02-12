@@ -1,0 +1,8 @@
+# Root pyproject.toml – not a package itself, just workspace-level tool config.
+
+[tool.pytest.ini_options]
+# Each package has its own conftest.py with package-specific fixtures.
+# Run tests per-package to avoid fixture collisions:
+#   pytest packages/sanjaya-core/
+#   DJANGO_SETTINGS_MODULE=tests.settings pytest packages/sanjaya/
+#   pytest packages/sanjaya-sqlalchemy/

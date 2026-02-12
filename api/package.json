@@ -1,13 +1,15 @@
 {
-  "name": "sanjaya",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "sanjaya-api",
+  "private": true,
+  "description": "TypeSpec definitions for the Sanjaya Dynamic Reporting API",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsp compile .",
+    "watch": "tsp compile . --watch"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "packageManager": "pnpm@10.29.3"
+  "packageManager": "pnpm@10.29.3",
+  "devDependencies": {
+    "@typespec/compiler": "^1.9.0",
+    "@typespec/http": "^1.9.0",
+    "@typespec/openapi3": "^1.9.0"
+  }
 }
