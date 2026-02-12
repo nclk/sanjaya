@@ -5,9 +5,36 @@ from __future__ import annotations
 import operator as op
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, model_validator
 
 from sanjaya_core.enums import FilterCombinator, FilterOperator
+
+
+def _accept_not_alias(data: Any) -> Any:
+    """Pre-validator: accept ``"not"`` as an alias for ``negate``."""
+    if isinstance(data, dict) and "not" in data and "negate" not in data:
+        data["negate"] = data.pop("not")
+    return data
+
+
+def _negate_to_not(data: dict[str, Any], *, by_alias: bool) -> dict[str, Any]:
+    """Post-dump helper: rename ``negate`` → ``not`` when *by_alias* is set.
+
+    Recurses into ``conditions`` and ``groups`` so nested models get the
+    rename as well (Pydantic's built-in serializer doesn't call custom
+    ``model_dump`` on nested models).
+    """
+    if not by_alias:
+        return data
+    if "negate" in data:
+        data["not"] = data.pop("negate")
+    for cond in data.get("conditions", []):
+        if isinstance(cond, dict) and "negate" in cond:
+            cond["not"] = cond.pop("negate")
+    for grp in data.get("groups", []):
+        if isinstance(grp, dict):
+            _negate_to_not(grp, by_alias=True)
+    return data
 
 
 class FilterCondition(BaseModel):
@@ -16,9 +43,16 @@ class FilterCondition(BaseModel):
     column: str
     operator: FilterOperator
     value: Any = None
-    negate: bool = Field(False, alias="not")
+    negate: bool = False
 
-    model_config = {"populate_by_name": True}
+    @model_validator(mode="before")
+    @classmethod
+    def _not_alias(cls, data: Any) -> Any:
+        return _accept_not_alias(data)
+
+    def model_dump(self, *, by_alias: bool | None = None, **kwargs: Any) -> dict[str, Any]:
+        data = super().model_dump(by_alias=by_alias, **kwargs)
+        return _negate_to_not(data, by_alias=bool(by_alias))
 
     # ------------------------------------------------------------------
     # In-memory evaluation (used by MockDataProvider, tests, etc.)
@@ -84,11 +118,18 @@ class FilterGroup(BaseModel):
     """A recursive boolean group of :class:`FilterCondition` predicates."""
 
     combinator: FilterCombinator = FilterCombinator.AND
-    negate: bool = Field(False, alias="not")
-    conditions: list[FilterCondition] = Field(default_factory=list)
-    groups: list[FilterGroup] = Field(default_factory=list)
+    negate: bool = False
+    conditions: list[FilterCondition] = []
+    groups: list[FilterGroup] = []
 
-    model_config = {"populate_by_name": True}
+    @model_validator(mode="before")
+    @classmethod
+    def _not_alias(cls, data: Any) -> Any:
+        return _accept_not_alias(data)
+
+    def model_dump(self, *, by_alias: bool | None = None, **kwargs: Any) -> dict[str, Any]:
+        data = super().model_dump(by_alias=by_alias, **kwargs)
+        return _negate_to_not(data, by_alias=bool(by_alias))
 
     def evaluate(self, row: dict[str, Any]) -> bool:
         """Return *True* if *row* satisfies this group."""
