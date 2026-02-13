@@ -28,6 +28,13 @@ class TestDatasetsAPI:
         names = {c["name"] for c in columns}
         assert names == {"year", "region", "product", "amount"}
 
+    def test_get_columns_includes_operators(self, client, user, mock_provider):
+        resp = client.get("/datasets/test_trades/columns", user=user)
+        columns = {c["name"]: c for c in resp.json()["columns"]}
+        assert columns["year"]["operators"] == ["eq", "in"]
+        assert columns["region"]["operators"] == ["eq", "in"]
+        assert columns["amount"]["operators"] == ["eq", "gt", "lt"]
+
     def test_get_columns_not_found(self, client, user):
         resp = client.get("/datasets/nonexistent/columns", user=user)
         assert resp.status_code == 404

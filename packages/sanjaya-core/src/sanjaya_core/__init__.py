@@ -15,14 +15,18 @@ from sanjaya_core.enums import (
 from sanjaya_core.types import (
     AggregateColumn,
     AggregateResult,
+    BOOLEAN_OPERATORS,
     ColumnMeta,
     ColumnPivotOptions,
     CurrencyOptions,
+    DATE_OPERATORS,
     DatasetCapabilities,
     FormatHints,
+    NUMBER_OPERATORS,
     PivotAggOption,
     SortSpec,
     TabularResult,
+    TEXT_OPERATORS,
     ValueSpec,
 )
 from sanjaya_core.filters import FilterCondition, FilterGroup
@@ -49,14 +53,18 @@ __all__ = [
     # types
     "AggregateColumn",
     "AggregateResult",
+    "BOOLEAN_OPERATORS",
     "ColumnMeta",
     "ColumnPivotOptions",
     "CurrencyOptions",
+    "DATE_OPERATORS",
     "DatasetCapabilities",
     "FormatHints",
+    "NUMBER_OPERATORS",
     "PivotAggOption",
     "SortSpec",
     "TabularResult",
+    "TEXT_OPERATORS",
     "ValueSpec",
     # filters
     "FilterCondition",

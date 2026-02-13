@@ -85,6 +85,58 @@ class ColumnMeta(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# Default operator presets
+# ---------------------------------------------------------------------------
+
+#: Common operators for text / string columns.
+TEXT_OPERATORS: list[FilterOperator] = [
+    FilterOperator.EQ,
+    FilterOperator.NEQ,
+    FilterOperator.CONTAINS,
+    FilterOperator.STARTSWITH,
+    FilterOperator.ENDSWITH,
+    FilterOperator.IN,
+    FilterOperator.IS_NULL,
+    FilterOperator.IS_NOT_NULL,
+]
+
+#: Common operators for numeric columns (number, currency, percentage).
+NUMBER_OPERATORS: list[FilterOperator] = [
+    FilterOperator.EQ,
+    FilterOperator.NEQ,
+    FilterOperator.GT,
+    FilterOperator.GTE,
+    FilterOperator.LT,
+    FilterOperator.LTE,
+    FilterOperator.BETWEEN,
+    FilterOperator.IN,
+    FilterOperator.IS_NULL,
+    FilterOperator.IS_NOT_NULL,
+]
+
+#: Common operators for date and datetime columns.
+DATE_OPERATORS: list[FilterOperator] = [
+    FilterOperator.EQ,
+    FilterOperator.NEQ,
+    FilterOperator.GT,
+    FilterOperator.GTE,
+    FilterOperator.LT,
+    FilterOperator.LTE,
+    FilterOperator.BETWEEN,
+    FilterOperator.IS_NULL,
+    FilterOperator.IS_NOT_NULL,
+]
+
+#: Common operators for boolean columns.
+BOOLEAN_OPERATORS: list[FilterOperator] = [
+    FilterOperator.EQ,
+    FilterOperator.NEQ,
+    FilterOperator.IS_NULL,
+    FilterOperator.IS_NOT_NULL,
+]
+
+
+# ---------------------------------------------------------------------------
 # Query helpers
 # ---------------------------------------------------------------------------
 
