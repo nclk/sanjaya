@@ -259,6 +259,14 @@ class SQLAlchemyProvider(DataProvider):
         self._selectable_input = None  # type: ignore[assignment]
         self._columns_input = None
 
+    @property
+    def _resolved_selectable(self) -> FromClause:
+        """Return the selectable, asserting it has been initialized."""
+        assert self._selectable is not None, (
+            "_selectable is None — call _ensure_initialized() first"
+        )
+        return self._selectable
+
     # ------------------------------------------------------------------
     # DataProvider interface
     # ------------------------------------------------------------------
@@ -280,7 +288,8 @@ class SQLAlchemyProvider(DataProvider):
     ) -> TabularResult:
         self._ensure_initialized()
         # --- count ---
-        count_stmt = sa.select(sa.func.count()).select_from(self._selectable)
+        selectable = self._resolved_selectable
+        count_stmt = sa.select(sa.func.count()).select_from(selectable)
         if filter_group:
             count_stmt = count_stmt.where(
                 compile_filter_group(filter_group, self._column_lookup)
@@ -288,7 +297,7 @@ class SQLAlchemyProvider(DataProvider):
 
         # --- data ---
         cols = [self._column_lookup[c] for c in selected_columns]
-        data_stmt = sa.select(*cols).select_from(self._selectable)
+        data_stmt = sa.select(*cols).select_from(selectable)
         if filter_group:
             data_stmt = data_stmt.where(
                 compile_filter_group(filter_group, self._column_lookup)
@@ -370,9 +379,10 @@ class SQLAlchemyProvider(DataProvider):
         ]
 
         # --- count (total groups) ---
+        selectable = self._resolved_selectable
         count_sub = (
             sa.select(*[c.label(c.name) for c in group_cols])
-            .select_from(self._selectable)
+            .select_from(selectable)
             .group_by(*group_cols)
         )
         if filter_group:
@@ -384,7 +394,7 @@ class SQLAlchemyProvider(DataProvider):
         # --- data ---
         data_stmt = (
             sa.select(*select_cols)
-            .select_from(self._selectable)
+            .select_from(selectable)
             .group_by(*group_cols)
         )
         if filter_group:
@@ -431,10 +441,11 @@ class SQLAlchemyProvider(DataProvider):
             )
 
         # --- pass 1: discover distinct pivot combos ---
+        selectable = self._resolved_selectable
         pivot_sa_cols = [self._column_lookup[c] for c in group_by_cols]
         combo_stmt = (
             sa.select(*pivot_sa_cols)
-            .select_from(self._selectable)
+            .select_from(selectable)
             .distinct()
         )
         if where_clause is not None:
@@ -491,7 +502,7 @@ class SQLAlchemyProvider(DataProvider):
         # count total groups
         count_sub = (
             sa.select(*[c.label(c.name) for c in group_row_cols])
-            .select_from(self._selectable)
+            .select_from(selectable)
             .group_by(*group_row_cols)
         )
         if where_clause is not None:
@@ -500,7 +511,7 @@ class SQLAlchemyProvider(DataProvider):
 
         data_stmt = (
             sa.select(*select_cols)
-            .select_from(self._selectable)
+            .select_from(selectable)
             .group_by(*group_row_cols)
         )
         if where_clause is not None:

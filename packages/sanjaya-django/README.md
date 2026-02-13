@@ -34,3 +34,19 @@ from sanjaya_django.api import router as reporting_router
 api = NinjaAPI()
 api.add_router("v1/reporting", reporting_router)
 ```
+
+### Trailing-slash tolerance
+
+By default Django redirects requests without a trailing slash (e.g.
+`POST /v1/reporting/reports`) with a `301`, which drops the request body
+for non-GET methods.  To allow clients to call your API with **or**
+without a trailing slash, add the provided middleware near the top of
+your `MIDDLEWARE` list:
+
+```python
+# settings.py
+MIDDLEWARE = [
+    "sanjaya_django.middleware.TrailingSlashMiddleware",
+    # …other middleware…
+]
+```
