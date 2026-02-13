@@ -33,6 +33,12 @@ dev = [
     "pytest>=8",
     "pytest-cov",
 ]
+mssql = [
+    "pyodbc>=5",
+]
+postgresql = [
+    "psycopg[binary]>=3",
+]
 
 [project.urls]
 Repository = "https://github.com/tjb1982/sanjaya"

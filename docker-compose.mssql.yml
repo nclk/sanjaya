@@ -1,0 +1,24 @@
+# MSSQL container for integration testing.
+#
+# Usage:
+#   docker compose -f docker-compose.mssql.yml up -d
+#   # wait ~15 s for SQL Server to accept connections, then:
+#   SANJAYA_MSSQL_URL="mssql+pyodbc://sa:Sanjaya_Test1@localhost:1433/sanjaya_test?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes&Encrypt=no" \
+#     pytest packages/sanjaya-sqlalchemy/ -k mssql -v
+#   docker compose -f docker-compose.mssql.yml down -v
+
+services:
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "Sanjaya_Test1"
+      MSSQL_PID: "Developer"
+    ports:
+      - "1433:1433"
+    healthcheck:
+      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "Sanjaya_Test1" -C -Q "SELECT 1" || exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 15s

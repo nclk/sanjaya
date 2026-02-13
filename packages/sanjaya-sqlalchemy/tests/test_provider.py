@@ -151,6 +151,33 @@ class TestSimpleAggregate:
         assert len(result.rows) == 1
         assert result.rows[0]["desk"] == "FX"
 
+    def test_aggregate_offset_without_explicit_sort(self, provider: SQLAlchemyProvider) -> None:
+        """MSSQL requires ORDER BY when OFFSET is used.
+
+        Even without an explicit sort the aggregate path must add a
+        deterministic fallback ORDER BY so the query compiles on MSSQL.
+        """
+        r1 = provider.aggregate(
+            group_by_rows=["desk"],
+            group_by_cols=[],
+            values=[ValueSpec(column="amount", agg=AggFunc.SUM)],
+            limit=1,
+            offset=0,
+        )
+        r2 = provider.aggregate(
+            group_by_rows=["desk"],
+            group_by_cols=[],
+            values=[ValueSpec(column="amount", agg=AggFunc.SUM)],
+            limit=1,
+            offset=1,
+        )
+        assert r1.total == 2
+        assert r2.total == 2
+        assert len(r1.rows) == 1
+        assert len(r2.rows) == 1
+        # The two pages must not overlap.
+        assert r1.rows[0]["desk"] != r2.rows[0]["desk"]
+
     def test_distinct_count(self, provider: SQLAlchemyProvider) -> None:
         result = provider.aggregate(
             group_by_rows=["desk"],
@@ -235,6 +262,32 @@ class TestPivotAggregate:
         )
         assert result.total == 1
         assert result.rows[0]["desk"] == "FX"
+
+    def test_pivot_offset_without_explicit_sort(self, provider: SQLAlchemyProvider) -> None:
+        """Pivot aggregation with offset but no explicit sort.
+
+        MSSQL requires ORDER BY when OFFSET is used; the provider must
+        supply a fallback ORDER BY so compilation does not fail.
+        """
+        r1 = provider.aggregate(
+            group_by_rows=["desk"],
+            group_by_cols=["region"],
+            values=[ValueSpec(column="amount", agg=AggFunc.SUM)],
+            limit=1,
+            offset=0,
+        )
+        r2 = provider.aggregate(
+            group_by_rows=["desk"],
+            group_by_cols=["region"],
+            values=[ValueSpec(column="amount", agg=AggFunc.SUM)],
+            limit=1,
+            offset=1,
+        )
+        assert r1.total == 2
+        assert r2.total == 2
+        assert len(r1.rows) == 1
+        assert len(r2.rows) == 1
+        assert r1.rows[0]["desk"] != r2.rows[0]["desk"]
 
 
 # ---------------------------------------------------------------------------
@@ -513,6 +566,41 @@ class TestAutoInferredColumns:
         assert by_name["full_name"].type == ColumnType.STRING
         assert by_name["full_name"].label == "Full Name"
         assert by_name["is_active"].type == ColumnType.BOOLEAN
+
+    def test_columns_from_selectable_with_column_clause(self) -> None:
+        """ColumnClause objects (sa.table / sa.column) lack .nullable.
+
+        This scenario is common with MSSQL when selectables are built
+        from lightweight column expressions rather than schema-bound
+        Column objects.  columns_from_selectable must not crash.
+        """
+        tbl = sa.table(
+            "lightweight",
+            sa.column("pk", sa.Integer),
+            sa.column("name", sa.String),
+        )
+        cols = columns_from_selectable(tbl)
+        assert len(cols) == 2
+        by_name = {c.name: c for c in cols}
+        assert by_name["pk"].type == ColumnType.NUMBER
+        assert by_name["name"].type == ColumnType.STRING
+        # Without a schema-level nullable flag the default should be True
+        assert by_name["pk"].nullable is True
+        assert by_name["name"].nullable is True
+
+    def test_columns_from_subquery_of_column_clause(self) -> None:
+        """Subquery columns derived from ColumnClause should also work."""
+        tbl = sa.table(
+            "lw",
+            sa.column("id", sa.Integer),
+            sa.column("val", sa.Float),
+        )
+        sub = sa.select(tbl).subquery()
+        cols = columns_from_selectable(sub)
+        assert len(cols) == 2
+        by_name = {c.name: c for c in cols}
+        assert by_name["id"].type == ColumnType.NUMBER
+        assert by_name["val"].type == ColumnType.NUMBER
 
     def test_omitted_columns_inferred(
         self, engine: sa.engine.Engine, trades_table: sa.Table,

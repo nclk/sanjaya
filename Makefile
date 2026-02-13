@@ -32,7 +32,9 @@ pkg_dir = packages/$(1)
 
 .PHONY: build snapshot publish build-all snapshot-all publish-all \
         test test-all clean help \
-        tsp-build tsp-publish tsp-snapshot
+        tsp-build tsp-publish tsp-snapshot \
+        mssql-up mssql-down mssql-test \
+        postgres-up postgres-down postgres-test
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -122,6 +124,44 @@ tsp-snapshot: tsp-build ## Publish a dev-tagged snapshot to npm
 	cd api && npm version $(TSP_SNAP) --no-git-tag-version && npm publish --tag dev
 	cd api && npm version $(TSP_BASE) --no-git-tag-version
 	@echo "── Published sanjaya-api@$(TSP_SNAP) (tag: dev) ──"
+
+# ── MSSQL integration tests ──────────────────────────────────────
+
+MSSQL_COMPOSE  := docker compose -f docker-compose.mssql.yml
+MSSQL_SA_PASS  := Sanjaya_Test1
+MSSQL_DB       := sanjaya_test
+MSSQL_URL      := mssql+pyodbc://sa:$(MSSQL_SA_PASS)@localhost:1433/$(MSSQL_DB)?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes&Encrypt=no
+
+mssql-up: ## Start MSSQL container and create test database
+	$(MSSQL_COMPOSE) up -d --wait
+	@echo "── Creating database $(MSSQL_DB) ──"
+	$(MSSQL_COMPOSE) exec -T mssql /opt/mssql-tools18/bin/sqlcmd \
+		-S localhost -U sa -P "$(MSSQL_SA_PASS)" -C \
+		-Q "IF DB_ID('$(MSSQL_DB)') IS NULL CREATE DATABASE [$(MSSQL_DB)]"
+	@echo "── MSSQL ready at localhost:1433 ──"
+
+mssql-down: ## Stop MSSQL container and remove volumes
+	$(MSSQL_COMPOSE) down -v
+
+mssql-test: mssql-up ## Run MSSQL integration tests (starts container if needed)
+	SANJAYA_MSSQL_URL="$(MSSQL_URL)" uv run pytest packages/sanjaya-sqlalchemy/ -k mssql -v
+
+# ── PostgreSQL integration tests ─────────────────────────────────
+
+PG_COMPOSE     := docker compose -f docker-compose.postgres.yml
+PG_PASSWORD    := Sanjaya_Test1
+PG_DB          := sanjaya_test
+PG_URL         := postgresql+psycopg://postgres:$(PG_PASSWORD)@localhost:5432/$(PG_DB)
+
+postgres-up: ## Start PostgreSQL container
+	$(PG_COMPOSE) up -d --wait
+	@echo "── PostgreSQL ready at localhost:5432 ──"
+
+postgres-down: ## Stop PostgreSQL container and remove volumes
+	$(PG_COMPOSE) down -v
+
+postgres-test: postgres-up ## Run PostgreSQL integration tests (starts container if needed)
+	SANJAYA_POSTGRES_URL="$(PG_URL)" uv run pytest packages/sanjaya-sqlalchemy/ -k postgres -v
 
 # ── Internal ─────────────────────────────────────────────────────
 

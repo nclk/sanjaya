@@ -113,12 +113,17 @@ def columns_from_selectable(selectable: FromClause) -> list[ColumnMeta]:
     result: list[ColumnMeta] = []
     for col in selectable.columns:
         col_type = infer_column_type(col.type)
+        # ColumnClause (produced by subqueries, sa.table(), sa.column(), etc.)
+        # does not carry a .nullable attribute — only schema-bound Column
+        # does.  Default to True (assume nullable) when the attribute is
+        # absent, which is the safer assumption for query generation.
+        nullable = getattr(col, "nullable", None)
         result.append(
             ColumnMeta(
                 name=col.name,
                 label=col.name.replace("_", " ").title(),
                 type=col_type,
-                nullable=col.nullable if col.nullable is not None else False,
+                nullable=nullable if nullable is not None else True,
             )
         )
     return result
@@ -303,7 +308,9 @@ class SQLAlchemyProvider(DataProvider):
                 compile_filter_group(filter_group, self._column_lookup)
             )
         data_stmt = self._apply_sort(data_stmt, sort, fallback_columns=cols)
-        data_stmt = data_stmt.limit(limit).offset(offset)
+        data_stmt = data_stmt.limit(limit)
+        if offset:
+            data_stmt = data_stmt.offset(offset)
 
         with self._engine.connect() as conn:
             total = conn.execute(count_stmt).scalar_one()
@@ -404,7 +411,8 @@ class SQLAlchemyProvider(DataProvider):
         data_stmt = self._apply_sort(data_stmt, sort, fallback_columns=group_cols)
         if limit is not None:
             data_stmt = data_stmt.limit(limit)
-        data_stmt = data_stmt.offset(offset)
+        if offset:
+            data_stmt = data_stmt.offset(offset)
 
         with self._engine.connect() as conn:
             total = conn.execute(count_stmt).scalar_one()
@@ -519,7 +527,8 @@ class SQLAlchemyProvider(DataProvider):
         data_stmt = self._apply_sort(data_stmt, sort, fallback_columns=group_row_cols)
         if limit is not None:
             data_stmt = data_stmt.limit(limit)
-        data_stmt = data_stmt.offset(offset)
+        if offset:
+            data_stmt = data_stmt.offset(offset)
 
         with self._engine.connect() as conn:
             total = conn.execute(count_stmt).scalar_one()
@@ -565,7 +574,10 @@ class SQLAlchemyProvider(DataProvider):
         if fallback_columns:
             return stmt.order_by(*[c.asc() for c in fallback_columns])
 
-        return stmt
+        # Ultimate fallback: MSSQL requires ORDER BY whenever OFFSET is
+        # present.  ``ORDER BY 1`` (first column in the select list) is
+        # the cheapest deterministic ordering we can guarantee.
+        return stmt.order_by(sa.literal_column("1"))
 
     def _agg_expression(self, vs: ValueSpec) -> ColumnElement[Any]:
         """Build a SQLAlchemy aggregate expression for a :class:`ValueSpec`."""
