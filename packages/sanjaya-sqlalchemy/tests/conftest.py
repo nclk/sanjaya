@@ -95,3 +95,20 @@ def provider(
         columns=COLUMN_DEFS,
         capabilities=DatasetCapabilities(pivot=True),
     )
+
+
+@pytest.fixture(scope="session")
+def select_provider(
+    engine: sa.engine.Engine,
+    trades_table: sa.Table,
+) -> SQLAlchemyProvider:
+    """Provider built from a ``select()`` statement (SelectBase)."""
+    stmt = sa.select(trades_table).where(trades_table.c.desk == "FX")
+    return SQLAlchemyProvider(
+        key="fx_trades",
+        label="FX Trades",
+        engine=engine,
+        selectable=stmt,
+        columns=COLUMN_DEFS,
+        capabilities=DatasetCapabilities(pivot=True),
+    )

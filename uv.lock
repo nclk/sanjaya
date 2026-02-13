@@ -823,7 +823,7 @@ provides-extras = ["dev"]
 
 [[package]]
 name = "sanjaya-sqlalchemy"
-version = "1.0.0"
+version = "1.0.0.dev1770994631"
 source = { editable = "packages/sanjaya-sqlalchemy" }
 dependencies = [
     { name = "sanjaya-core" },

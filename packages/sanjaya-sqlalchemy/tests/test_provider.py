@@ -220,6 +220,68 @@ class TestPivotAggregate:
 
 
 # ---------------------------------------------------------------------------
+# SelectBase selectable (select() as input)
+# ---------------------------------------------------------------------------
+
+
+class TestSelectBaseSelectable:
+    """Tests using a provider constructed with a ``select()`` statement."""
+
+    def test_query_returns_filtered_rows(self, select_provider: SQLAlchemyProvider) -> None:
+        result = select_provider.query(["id", "desk", "amount"])
+        assert result.total == 4  # only FX rows
+        assert all(r["desk"] == "FX" for r in result.rows)
+
+    def test_sort(self, select_provider: SQLAlchemyProvider) -> None:
+        result = select_provider.query(
+            ["id", "amount"],
+            sort=[SortSpec(column="amount", direction=SortDirection.ASC)],
+        )
+        amounts = [r["amount"] for r in result.rows]
+        assert amounts == sorted(amounts)
+
+    def test_additional_filter(self, select_provider: SQLAlchemyProvider) -> None:
+        fg = FilterGroup(conditions=[
+            FilterCondition(column="region", operator=FilterOperator.EQ, value="US"),
+        ])
+        result = select_provider.query(["id", "desk"], filter_group=fg)
+        assert result.total == 2  # FX-US rows only
+        assert all(r["desk"] == "FX" for r in result.rows)
+
+    def test_simple_aggregate(self, select_provider: SQLAlchemyProvider) -> None:
+        result = select_provider.aggregate(
+            group_by_rows=["region"],
+            group_by_cols=[],
+            values=[ValueSpec(column="amount", agg=AggFunc.SUM)],
+        )
+        sums = {r["region"]: r["sum_amount"] for r in result.rows}
+        assert sums["US"] == 3000.0   # 1000 + 2000
+        assert sums["EU"] == 1500.0
+        assert sums["APAC"] == 500.0
+
+    def test_pivot_aggregate(self, select_provider: SQLAlchemyProvider) -> None:
+        result = select_provider.aggregate(
+            group_by_rows=["desk"],
+            group_by_cols=["region"],
+            values=[ValueSpec(column="amount", agg=AggFunc.SUM)],
+        )
+        assert result.total == 1  # only FX
+        fx_row = result.rows[0]
+        assert fx_row["desk"] == "FX"
+        assert fx_row["US_sum_amount"] == 3000.0
+        assert fx_row["EU_sum_amount"] == 1500.0
+        assert fx_row["APAC_sum_amount"] == 500.0
+
+    def test_get_columns(self, select_provider: SQLAlchemyProvider) -> None:
+        cols = select_provider.get_columns()
+        assert len(cols) == 6
+
+    def test_identity(self, select_provider: SQLAlchemyProvider) -> None:
+        assert select_provider.key == "fx_trades"
+        assert select_provider.label == "FX Trades"
+
+
+# ---------------------------------------------------------------------------
 # Provider metadata
 # ---------------------------------------------------------------------------
 

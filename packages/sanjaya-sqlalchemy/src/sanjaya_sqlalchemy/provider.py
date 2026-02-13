@@ -39,7 +39,7 @@ from typing import Any
 import sqlalchemy as sa
 from sqlalchemy import FromClause
 from sqlalchemy.engine import Engine
-from sqlalchemy.sql.expression import ColumnElement
+from sqlalchemy.sql.expression import ColumnElement, SelectBase
 
 from sanjaya_core.context import RequestContext
 from sanjaya_core.enums import AggFunc, SortDirection
@@ -71,8 +71,10 @@ class SQLAlchemyProvider(DataProvider):
         A SQLAlchemy :class:`~sqlalchemy.engine.Engine` used to execute
         queries.
     selectable:
-        The table or subquery to query against (e.g. a
-        :class:`~sqlalchemy.Table` or ``select()``).
+        The table, subquery, or select statement to query against
+        (e.g. a :class:`~sqlalchemy.Table`, ``select()``, or any
+        :class:`~sqlalchemy.sql.expression.SelectBase`).  A
+        ``SelectBase`` is automatically wrapped via ``.subquery()``.
     columns:
         Column metadata definitions.  Each
         :attr:`~sanjaya_core.types.ColumnMeta.name` must match a column
@@ -89,7 +91,7 @@ class SQLAlchemyProvider(DataProvider):
         key: str,
         label: str,
         engine: Engine,
-        selectable: FromClause,
+        selectable: FromClause | SelectBase,
         columns: list[ColumnMeta],
         description: str = "",
         capabilities: DatasetCapabilities | None = None,
@@ -101,10 +103,12 @@ class SQLAlchemyProvider(DataProvider):
             capabilities=capabilities or DatasetCapabilities(pivot=True),
         )
         self._engine = engine
-        self._selectable = selectable
+        self._selectable: FromClause = (
+            selectable.subquery() if isinstance(selectable, SelectBase) else selectable
+        )
         self._columns = columns
         self._column_lookup: dict[str, ColumnElement[Any]] = {
-            c.name: selectable.c[c.name] for c in columns
+            c.name: self._selectable.c[c.name] for c in columns
         }
 
     # ------------------------------------------------------------------
