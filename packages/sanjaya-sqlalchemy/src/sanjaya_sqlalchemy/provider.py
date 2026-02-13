@@ -30,11 +30,23 @@ Usage example::
         ],
         capabilities=DatasetCapabilities(pivot=True),
     )
+
+The ``engine`` parameter also accepts a zero-argument callable that returns
+an :class:`~sqlalchemy.engine.Engine`.  This is useful when engine creation
+is expensive and should be deferred until the first query::
+
+    provider = SQLAlchemyProvider(
+        key="trade_activity",
+        label="Trade Activity",
+        engine=lambda: create_engine("postgresql://..."),
+        selectable=trade_table,
+        columns=[...],
+    )
 """
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Callable
 
 import sqlalchemy as sa
 from sqlalchemy import FromClause
@@ -69,7 +81,9 @@ class SQLAlchemyProvider(DataProvider):
         Human-readable name.
     engine:
         A SQLAlchemy :class:`~sqlalchemy.engine.Engine` used to execute
-        queries.
+        queries, **or** a zero-argument callable that returns one.  When
+        a callable is provided the engine is created lazily on the first
+        query, which avoids expensive connection setup at import time.
     selectable:
         The table, subquery, or select statement to query against
         (e.g. a :class:`~sqlalchemy.Table`, ``select()``, or any
@@ -90,7 +104,7 @@ class SQLAlchemyProvider(DataProvider):
         *,
         key: str,
         label: str,
-        engine: Engine,
+        engine: Engine | Callable[[], Engine],
         selectable: FromClause | SelectBase,
         columns: list[ColumnMeta],
         description: str = "",
@@ -102,7 +116,12 @@ class SQLAlchemyProvider(DataProvider):
             description=description,
             capabilities=capabilities or DatasetCapabilities(pivot=True),
         )
-        self._engine = engine
+        if callable(engine) and not isinstance(engine, Engine):
+            self._engine_factory: Callable[[], Engine] | None = engine
+            self._engine_instance: Engine | None = None
+        else:
+            self._engine_factory = None
+            self._engine_instance = engine  # type: ignore[assignment]
         self._selectable: FromClause = (
             selectable.subquery() if isinstance(selectable, SelectBase) else selectable
         )
@@ -110,6 +129,15 @@ class SQLAlchemyProvider(DataProvider):
         self._column_lookup: dict[str, ColumnElement[Any]] = {
             c.name: self._selectable.c[c.name] for c in columns
         }
+
+    @property
+    def _engine(self) -> Engine:
+        """Return the engine, creating it on first access if needed."""
+        if self._engine_instance is None:
+            assert self._engine_factory is not None
+            self._engine_instance = self._engine_factory()
+            self._engine_factory = None  # release the factory reference
+        return self._engine_instance
 
     # ------------------------------------------------------------------
     # DataProvider interface

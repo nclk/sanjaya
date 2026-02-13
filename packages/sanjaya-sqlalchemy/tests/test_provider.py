@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import sqlalchemy as sa
+
 from sanjaya_core.enums import AggFunc, FilterOperator, SortDirection
 from sanjaya_core.filters import FilterCondition, FilterGroup
 from sanjaya_core.types import SortSpec, ValueSpec
@@ -316,3 +318,62 @@ class TestProviderMeta:
     def test_identity(self, provider: SQLAlchemyProvider) -> None:
         assert provider.key == "trades"
         assert provider.label == "Trades"
+
+
+# ---------------------------------------------------------------------------
+# Lazy engine
+# ---------------------------------------------------------------------------
+
+
+class TestLazyEngine:
+    """Engine creation can be deferred via a callable."""
+
+    def test_engine_factory_not_called_at_init(
+        self, trades_table: sa.Table,
+    ) -> None:
+        """The factory must not be invoked during __init__."""
+        called = False
+
+        def factory() -> sa.engine.Engine:
+            nonlocal called
+            called = True
+            return sa.create_engine("sqlite:///:memory:")
+
+        SQLAlchemyProvider(
+            key="lazy_test",
+            label="Lazy",
+            engine=factory,
+            selectable=trades_table,
+            columns=[],
+        )
+        assert not called, "engine factory should not be called at construction time"
+
+    def test_engine_factory_called_on_first_query(
+        self, engine: sa.engine.Engine, trades_table: sa.Table,
+    ) -> None:
+        """The factory is invoked on the first actual query."""
+        from tests.conftest import COLUMN_DEFS
+
+        call_count = 0
+
+        def factory() -> sa.engine.Engine:
+            nonlocal call_count
+            call_count += 1
+            return engine
+
+        p = SQLAlchemyProvider(
+            key="lazy_test",
+            label="Lazy",
+            engine=factory,
+            selectable=trades_table,
+            columns=COLUMN_DEFS,
+        )
+
+        assert call_count == 0
+        result = p.query(["id", "desk"])
+        assert call_count == 1
+        assert result.total == 7
+
+        # Subsequent queries reuse the engine — factory is not called again.
+        p.query(["id"])
+        assert call_count == 1

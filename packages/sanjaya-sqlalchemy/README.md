@@ -35,3 +35,37 @@ provider = SQLAlchemyProvider(
     capabilities=DatasetCapabilities(pivot=True),
 )
 ```
+
+### Lazy engine creation
+
+If creating the engine at module-load time is too expensive (e.g. the
+connection pool takes a long time to initialise), pass a zero-argument
+callable instead.  The engine will be created on the first query:
+
+```python
+from sqlalchemy import MetaData, create_engine
+from sanjaya_sqlalchemy import SQLAlchemyProvider
+
+# MetaData can still be built against a lightweight / temporary engine,
+# or defined manually with sa.Table(...) / sa.Column(...).
+metadata = MetaData()
+trade_table = sa.Table(
+    "trade_activity",
+    metadata,
+    sa.Column("id", sa.Integer, primary_key=True),
+    sa.Column("desk", sa.String(50)),
+    sa.Column("amount", sa.Float),
+)
+
+provider = SQLAlchemyProvider(
+    key="trade_activity",
+    label="Trade Activity",
+    engine=lambda: create_engine("postgresql://..."),
+    selectable=trade_table,
+    columns=[...],
+)
+```
+
+This pairs well with the `ProviderRegistry.add_lazy()` API in
+`sanjaya-django` for fully deferred provider setup.
+```
