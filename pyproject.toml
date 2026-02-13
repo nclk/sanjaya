@@ -1,5 +1,24 @@
 # Root pyproject.toml – not a package itself, just workspace-level tool config.
 
+[dependency-groups]
+dev = [
+    "build>=1.0",
+    "twine>=5.0",
+    "pytest>=8",
+    "pytest-cov",
+    "pytest-django>=4.5",
+]
+
+[tool.uv.workspace]
+members = [
+    "packages/sanjaya-core",
+    "packages/sanjaya",
+    "packages/sanjaya-sqlalchemy",
+]
+
+[tool.uv.sources]
+sanjaya-core = { workspace = true }
+
 [tool.pytest.ini_options]
 # Each package has its own conftest.py with package-specific fixtures.
 # Run tests per-package to avoid fixture collisions:

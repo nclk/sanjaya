@@ -29,7 +29,8 @@ api/                  # TypeSpec definitions → OpenAPI 3.0
 - **pytest** — test runner. Each package has its own `tests/` and `conftest.py`.
   Never run all packages with a single `pytest` invocation (fixture name
   collisions between packages).
-- **uv** — package installer (`uv pip install -e "packages/foo[dev]"`).
+- **uv** — package installer and venv manager. The project uses a uv-derived
+  virtual environment (`uv venv`, `uv pip install -e "packages/foo[dev]"`).
 - **TypeSpec 1.9** — `api/` directory, compiled with `pnpm build`.
 
 ## Architecture principles

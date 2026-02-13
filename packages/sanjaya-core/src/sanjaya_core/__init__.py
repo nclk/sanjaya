@@ -1,5 +1,7 @@
 """sanjaya-core — shared types and data-provider interface."""
 
+__version__ = "0.1.0"
+
 from sanjaya_core.enums import (
     AggFunc,
     ColumnType,

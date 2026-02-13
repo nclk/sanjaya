@@ -7,8 +7,22 @@ name = "sanjaya-core"
 version = "0.1.0"
 description = "Shared types and data-provider interface for the Sanjaya reporting platform"
 readme = "README.md"
-requires-python = ">=3.12,<3.13"
+requires-python = ">=3.12"
 license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+    { name = "Tom Brennan" },
+]
+keywords = ["reporting", "data-provider", "pydantic", "analytics"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Typing :: Typed",
+]
 dependencies = [
     "pydantic>=2.0,<3",
 ]
@@ -18,6 +32,10 @@ dev = [
     "pytest>=8",
     "pytest-cov",
 ]
+
+[project.urls]
+Repository = "https://github.com/tjb1982/sanjaya"
+Issues = "https://github.com/tjb1982/sanjaya/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/sanjaya_core"]

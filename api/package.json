@@ -1,12 +1,36 @@
 {
-  "name": "sanjaya-api",
-  "private": true,
+  "name": "@pojagi/sanjaya-api",
+  "version": "0.1.0",
   "description": "TypeSpec definitions for the Sanjaya Dynamic Reporting API",
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "author": "Tom Brennan",
+  "repository": {
+    "type": "git",
+    "url": "https://git.tjb1982.com/pojagi/sanjaya",
+    "directory": "api"
+  },
+  "tspMain": "main.tsp",
+  "files": [
+    "main.tsp",
+    "models/",
+    "rest/",
+    "tspconfig.yaml",
+    "tsp-output/",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsp compile .",
-    "watch": "tsp compile . --watch"
+    "watch": "tsp compile . --watch",
+    "prepack": "tsp compile ."
   },
   "packageManager": "pnpm@10.29.3",
+  "peerDependencies": {
+    "@typespec/compiler": "^1.9.0",
+    "@typespec/http": "^1.9.0"
+  },
   "devDependencies": {
     "@typespec/compiler": "^1.9.0",
     "@typespec/http": "^1.9.0",

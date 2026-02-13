@@ -19,10 +19,8 @@ The project is split into three independently installable packages:
 ## Quick start
 
 ```bash
-# install everything for local development
-uv pip install -e "packages/sanjaya-core[dev]" \
-               -e "packages/sanjaya[dev]" \
-               -e "packages/sanjaya-sqlalchemy[dev]"
+# install all packages and dev dependencies
+uv sync
 ```
 
 ### 1. Define a dataset
@@ -118,6 +116,111 @@ DJANGO_SETTINGS_MODULE=tests.settings pytest packages/sanjaya/
 - Python ≥ 3.12
 - Django ≥ 4.2 (for the `sanjaya` app)
 - SQLAlchemy ≥ 2.0 (for `sanjaya-sqlalchemy`)
+
+## Building & publishing
+
+All build and publish tasks are driven by the root [Makefile](Makefile) using
+`uv run` (for Python packages) and `pnpm`/`npm` (for the TypeSpec package).
+
+### Prerequisites
+
+Build and publish tools are declared in the root `pyproject.toml`
+`[dependency-groups]` and installed automatically by:
+
+```bash
+uv sync
+```
+
+For the TypeSpec package, ensure `pnpm` and `npm` are available.
+
+### Python packages
+
+```bash
+# Build a single package (sdist + wheel)
+make build PKG=sanjaya-core
+
+# Build all three packages in dependency order
+make build-all
+
+# Publish a single package to PyPI
+make publish PKG=sanjaya-core
+
+# Publish all three
+make publish-all
+```
+
+### Snapshot (dev) releases
+
+Snapshot builds use [PEP 440](https://peps.python.org/pep-0440/) `.devN`
+versions (e.g. `0.1.0.dev1770940497`).  These are **excluded by default** from
+`pip install`, so they are safe to publish to regular PyPI — they will never
+leak to production consumers.
+
+```bash
+# Build a snapshot for one package
+make snapshot PKG=sanjaya-core
+
+# Build snapshots for all packages
+make snapshot-all
+
+# Then publish as usual
+make publish PKG=sanjaya-core
+```
+
+The snapshot target temporarily stamps the version in `pyproject.toml` and
+`__init__.py`, builds the wheel/sdist, then reverts the files so the snapshot
+version is never committed.
+
+**Installing snapshots:**
+
+```bash
+# Latest dev build
+pip install --pre sanjaya-core
+
+# Exact version
+pip install sanjaya-core==0.1.0.dev1770940497
+```
+
+### TypeSpec package
+
+The `sanjaya-api` npm package ships the TypeSpec source files so consumers can
+import models and routes into their own TypeSpec projects.
+
+```bash
+# Compile TypeSpec → OpenAPI
+make tsp-build
+
+# Publish a stable release to npm
+make tsp-publish
+
+# Publish a dev-tagged snapshot to npm
+make tsp-snapshot
+```
+
+**Consuming the TypeSpec package:**
+
+```bash
+npm install sanjaya-api          # stable
+npm install sanjaya-api@dev      # latest snapshot
+```
+
+```typespec
+import "sanjaya-api";
+import "sanjaya-api/models/dynamic-reports.tsp";
+```
+
+### PyPI credentials
+
+Create per-project API tokens at [pypi.org](https://pypi.org/manage/account/token/)
+and configure `~/.pypirc`:
+
+```ini
+[pypi]
+username = __token__
+password = pypi-AgEI...
+```
+
+Any team member with a token can cut and publish a snapshot from their machine.
 
 ## License
 
