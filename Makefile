@@ -24,7 +24,7 @@
 #   pip install sanjaya-core==0.1.0.dev1739378400
 # ──────────────────────────────────────────────────────────────────
 
-PACKAGES := sanjaya-core sanjaya sanjaya-sqlalchemy
+PACKAGES := sanjaya-core sanjaya-ninja sanjaya-sqlalchemy
 PKG_DIR   = packages/$(PKG)
 
 # Map package name → directory
@@ -46,7 +46,7 @@ build: _require-pkg ## Build sdist + wheel for PKG
 snapshot: _require-pkg ## Build a .devN snapshot for PKG
 	@echo "── Creating snapshot for $(PKG) ──"
 	$(eval TOML := $(PKG_DIR)/pyproject.toml)
-	$(eval INIT := $(shell find $(PKG_DIR)/src -name '__init__.py' -path '*/$(subst -,_,$(PKG))/*' | head -1))
+	$(eval INIT := $(shell grep -rl '__version__' $(PKG_DIR)/src --include='__init__.py' | head -1))
 	$(eval BASE_VERSION := $(shell grep '^version' $(TOML) | head -1 | sed 's/.*"\(.*\)"/\1/'))
 	$(eval DEV_N := $(shell date +%s))
 	$(eval SNAP_VERSION := $(BASE_VERSION).dev$(DEV_N))
@@ -67,10 +67,10 @@ publish: _require-pkg ## Upload dist/ to PyPI for PKG
 	uv run twine upload $(PKG_DIR)/dist/*
 
 test: _require-pkg ## Run tests for PKG
-	@if [ "$(PKG)" = "sanjaya" ]; then \
-		DJANGO_SETTINGS_MODULE=tests.settings pytest $(PKG_DIR)/; \
+	@if [ "$(PKG)" = "sanjaya-ninja" ]; then \
+		DJANGO_SETTINGS_MODULE=tests.settings uv run pytest $(PKG_DIR)/; \
 	else \
-		pytest $(PKG_DIR)/; \
+		uv run pytest $(PKG_DIR)/; \
 	fi
 
 clean: ## Remove all dist/ and *.egg-info dirs
@@ -98,10 +98,10 @@ publish-all: ## Upload all packages to PyPI
 test-all: ## Run tests for all packages
 	@for pkg in $(PACKAGES); do \
 		echo "── Testing $$pkg ──"; \
-		if [ "$$pkg" = "sanjaya" ]; then \
-			DJANGO_SETTINGS_MODULE=tests.settings pytest packages/$$pkg/; \
+		if [ "$$pkg" = "sanjaya-ninja" ]; then \
+			DJANGO_SETTINGS_MODULE=tests.settings uv run pytest packages/$$pkg/; \
 		else \
-			pytest packages/$$pkg/; \
+			uv run pytest packages/$$pkg/; \
 		fi; \
 	done
 

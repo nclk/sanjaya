@@ -8,7 +8,7 @@ from sanjaya_core.exceptions import DatasetNotFoundError
 from sanjaya_core.mock import MockDataProvider
 from sanjaya_core.types import ColumnMeta, DatasetCapabilities
 
-from sanjaya.registry import ProviderRegistry
+from sanjaya_ninja.registry import ProviderRegistry
 
 
 @pytest.fixture()

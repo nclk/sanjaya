@@ -16,8 +16,8 @@ from sanjaya_core.types import (
     PivotAggOption,
 )
 
-from sanjaya.api import router
-from sanjaya.registry import registry
+from sanjaya_ninja.api import router
+from sanjaya_ninja.registry import registry
 
 User = get_user_model()
 

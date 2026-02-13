@@ -10,13 +10,13 @@ from sanjaya_core.exceptions import (
     DatasetNotFoundError,
 )
 
-from sanjaya.registry import registry
-from sanjaya.schemas.errors import CustomErrorResponse, ErrorDetail, make_not_found
-from sanjaya.schemas.pivot import (
+from sanjaya_ninja.registry import registry
+from sanjaya_ninja.schemas.errors import CustomErrorResponse, ErrorDetail, make_not_found
+from sanjaya_ninja.schemas.pivot import (
     ServerSideGetRowsRequest,
     ServerSideGetRowsResponse,
 )
-from sanjaya.services.pivot import handle_ssrm_request
+from sanjaya_ninja.services.pivot import handle_ssrm_request
 
 router = Router(tags=["pivot"])
 

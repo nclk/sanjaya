@@ -11,7 +11,7 @@ TypeSpec API definition.
 ```
 packages/
   sanjaya-core/       # Shared types, enums, DataProvider ABC, MockDataProvider
-  sanjaya/            # Django Ninja app (API, models, services, schemas)
+  sanjaya-ninja/      # Django Ninja app (API, models, services, schemas)
   sanjaya-sqlalchemy/ # SQLAlchemy Core DataProvider implementation
 api/                  # TypeSpec definitions → OpenAPI 3.0
 ```
@@ -21,7 +21,7 @@ api/                  # TypeSpec definitions → OpenAPI 3.0
 - **Python 3.12** — use `StrEnum`, `match`/`case`, modern type hints.
 - **Pydantic v2** — all shared models. Use `model_validator`, `field_validator`,
   `model_dump()` (never `.dict()`).
-- **Django ≥ 4.2** + **Django Ninja ≥ 1.0** — for the `sanjaya` app.
+- **Django ≥ 4.2** + **Django Ninja ≥ 1.0** — for the `sanjaya-ninja` app.
 - **SQLAlchemy ≥ 2.0 Core** — no ORM. Use `sa.select()`, `sa.func`, column
   expressions.  The provider's `_column_lookup` is
   `dict[str, ColumnElement[Any]]`.
@@ -37,7 +37,7 @@ api/                  # TypeSpec definitions → OpenAPI 3.0
 
 - **`sanjaya-core` has zero framework dependencies.** It defines the
   `DataProvider` ABC and all Pydantic models. Any new shared type goes here.
-- **`sanjaya` (Django app) never imports SQLAlchemy.** It talks to providers
+- **`sanjaya-ninja` (Django app) never imports SQLAlchemy.** It talks to providers
   only through the `DataProvider` interface.
 - **`sanjaya-sqlalchemy` depends only on `sanjaya-core` and `sqlalchemy`.**
   It never imports Django.
@@ -45,7 +45,7 @@ api/                  # TypeSpec definitions → OpenAPI 3.0
   calls `ProviderRegistry().add(...)`.  Configured via `SANJAYA_PROVIDERS`
   in Django settings.
 - **AG Grid SSRM** — the pivot endpoint speaks the AG Grid Server-Side Row
-  Model wire format. Pivot translation lives in `sanjaya.services.pivot`.
+  Model wire format. Pivot translation lives in `sanjaya_ninja.services.pivot`.
 - **Server-driven export** — CSV (streaming) and XLSX via `openpyxl`.
 
 ## Key patterns
@@ -95,7 +95,7 @@ parameterised paths (`/{report_id}`) to avoid route shadowing.
 ```bash
 pytest packages/sanjaya-core/
 pytest packages/sanjaya-sqlalchemy/
-DJANGO_SETTINGS_MODULE=tests.settings pytest packages/sanjaya/
+DJANGO_SETTINGS_MODULE=tests.settings pytest packages/sanjaya-ninja/
 ```
 
 ## Building the TypeSpec

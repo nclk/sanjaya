@@ -3,7 +3,7 @@
 Usage in the host project::
 
     from ninja import NinjaAPI
-    from sanjaya.api import router as reporting_router
+    from sanjaya_ninja.api import router as reporting_router
 
     api = NinjaAPI()
     api.add_router("v1/reporting", reporting_router)
@@ -11,10 +11,10 @@ Usage in the host project::
 
 from ninja import Router
 
-from sanjaya.api.datasets import router as datasets_router
-from sanjaya.api.export import router as export_router
-from sanjaya.api.pivot import router as pivot_router
-from sanjaya.api.reports import router as reports_router
+from sanjaya_ninja.api.datasets import router as datasets_router
+from sanjaya_ninja.api.export import router as export_router
+from sanjaya_ninja.api.pivot import router as pivot_router
+from sanjaya_ninja.api.reports import router as reports_router
 
 router = Router()
 

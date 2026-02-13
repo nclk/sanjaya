@@ -19,8 +19,8 @@ from sanjaya_core.types import (
     ValueSpec,
 )
 
-from sanjaya.schemas.export import ExportRequest
-from sanjaya.schemas.filters import parse_ag_grid_filter_model, parse_filter_group
+from sanjaya_ninja.schemas.export import ExportRequest
+from sanjaya_ninja.schemas.filters import parse_ag_grid_filter_model, parse_filter_group
 
 
 def handle_export(

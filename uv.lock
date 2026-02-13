@@ -4,8 +4,8 @@ requires-python = ">=3.12"
 
 [manifest]
 members = [
-    "sanjaya",
     "sanjaya-core",
+    "sanjaya-ninja",
     "sanjaya-sqlalchemy",
 ]
 
@@ -770,9 +770,31 @@ wheels = [
 ]
 
 [[package]]
-name = "sanjaya"
-version = "0.1.1"
-source = { editable = "packages/sanjaya" }
+name = "sanjaya-core"
+version = "1.0.0"
+source = { editable = "packages/sanjaya-core" }
+dependencies = [
+    { name = "pydantic" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-cov" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "pydantic", specifier = ">=2.0,<3" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8" },
+    { name = "pytest-cov", marker = "extra == 'dev'" },
+]
+provides-extras = ["dev"]
+
+[[package]]
+name = "sanjaya-ninja"
+version = "1.0.0"
+source = { editable = "packages/sanjaya-ninja" }
 dependencies = [
     { name = "django" },
     { name = "django-ninja" },
@@ -800,30 +822,8 @@ requires-dist = [
 provides-extras = ["dev"]
 
 [[package]]
-name = "sanjaya-core"
-version = "0.1.1"
-source = { editable = "packages/sanjaya-core" }
-dependencies = [
-    { name = "pydantic" },
-]
-
-[package.optional-dependencies]
-dev = [
-    { name = "pytest" },
-    { name = "pytest-cov" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "pydantic", specifier = ">=2.0,<3" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8" },
-    { name = "pytest-cov", marker = "extra == 'dev'" },
-]
-provides-extras = ["dev"]
-
-[[package]]
 name = "sanjaya-sqlalchemy"
-version = "0.1.1"
+version = "1.0.0"
 source = { editable = "packages/sanjaya-sqlalchemy" }
 dependencies = [
     { name = "sanjaya-core" },

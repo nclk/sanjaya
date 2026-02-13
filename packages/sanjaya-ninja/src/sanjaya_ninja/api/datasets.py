@@ -7,8 +7,8 @@ from ninja import Router
 from sanjaya_core.context import RequestContext
 from sanjaya_core.exceptions import DatasetNotFoundError
 
-from sanjaya.registry import registry
-from sanjaya.schemas.datasets import (
+from sanjaya_ninja.registry import registry
+from sanjaya_ninja.schemas.datasets import (
     ColumnsResponse,
     ColumnOut,
     DatasetCapabilitiesOut,
@@ -17,8 +17,8 @@ from sanjaya.schemas.datasets import (
     PreviewRequest,
     PreviewResponse,
 )
-from sanjaya.schemas.errors import CustomErrorResponse, ErrorDetail, make_not_found
-from sanjaya.schemas.filters import parse_filter_group
+from sanjaya_ninja.schemas.errors import CustomErrorResponse, ErrorDetail, make_not_found
+from sanjaya_ninja.schemas.filters import parse_filter_group
 
 router = Router(tags=["datasets"])
 

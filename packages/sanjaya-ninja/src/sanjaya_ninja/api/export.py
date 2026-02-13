@@ -7,10 +7,10 @@ from ninja import Router
 from sanjaya_core.context import RequestContext
 from sanjaya_core.exceptions import DatasetNotFoundError
 
-from sanjaya.registry import registry
-from sanjaya.schemas.errors import CustomErrorResponse, ErrorDetail, make_not_found
-from sanjaya.schemas.export import ExportRequest
-from sanjaya.services.export import handle_export
+from sanjaya_ninja.registry import registry
+from sanjaya_ninja.schemas.errors import CustomErrorResponse, ErrorDetail, make_not_found
+from sanjaya_ninja.schemas.export import ExportRequest
+from sanjaya_ninja.services.export import handle_export
 
 router = Router(tags=["export"])
 

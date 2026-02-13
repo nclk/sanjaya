@@ -108,7 +108,7 @@ class TestPivotAPI:
         """Dataset without pivot capability should return 501."""
         from sanjaya_core.mock import MockDataProvider
         from sanjaya_core.types import DatasetCapabilities
-        from sanjaya.registry import registry
+        from sanjaya_ninja.registry import registry
 
         registry.add(
             MockDataProvider(

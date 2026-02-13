@@ -7,13 +7,13 @@ from django.contrib.auth.models import Group
 from django.shortcuts import get_object_or_404
 from ninja import Router
 
-from sanjaya.models import (
+from sanjaya_ninja.models import (
     DynamicReport,
     DynamicReportGroupShare,
     DynamicReportUserShare,
     Permission,
 )
-from sanjaya.schemas.errors import (
+from sanjaya_ninja.schemas.errors import (
     CustomErrorResponse,
     ErrorDetail,
     PermissionErrorResponse,
@@ -21,7 +21,7 @@ from sanjaya.schemas.errors import (
     make_not_found,
     make_permission_error,
 )
-from sanjaya.schemas.reports import (
+from sanjaya_ninja.schemas.reports import (
     ActionResponse,
     CreateDynamicReportRequest,
     DeleteGroupShareRequest,
@@ -38,7 +38,7 @@ from sanjaya.schemas.reports import (
     UpsertUserShareRequest,
     UserShareOut,
 )
-from sanjaya.services.reports import (
+from sanjaya_ninja.services.reports import (
     can_edit,
     can_view,
     compute_available_actions,
@@ -125,7 +125,7 @@ def list_reports(
     qs = DynamicReport.objects.select_related("created_by")
 
     # Filter to reports the user can see.
-    if not user.is_superuser and not user.has_perm("sanjaya.can_view_any"):
+    if not user.is_superuser and not user.has_perm("sanjaya_ninja.can_view_any"):
         user_group_ids = user.groups.values_list("pk", flat=True)
         qs = qs.filter(
             models_Q_visible(user, user_group_ids)
@@ -358,7 +358,7 @@ def list_shares(request, report_id: int):
     report = DynamicReport.objects.filter(pk=report_id).first()
     if not report:
         return 404, make_not_found("Report", str(report_id))
-    if not is_owner(report, request.user) and not request.user.has_perm("sanjaya.can_manage_shares_any"):
+    if not is_owner(report, request.user) and not request.user.has_perm("sanjaya_ninja.can_manage_shares_any"):
         return 403, make_permission_error()
 
     return 200, _shares_response(report)
@@ -377,7 +377,7 @@ def upsert_user_share(request, report_id: int, body: UpsertUserShareRequest):
     report = DynamicReport.objects.filter(pk=report_id).first()
     if not report:
         return 404, make_not_found("Report", str(report_id))
-    if not is_owner(report, request.user) and not request.user.has_perm("sanjaya.can_manage_shares_any"):
+    if not is_owner(report, request.user) and not request.user.has_perm("sanjaya_ninja.can_manage_shares_any"):
         return 403, make_permission_error()
 
     target_user = User.objects.filter(pk=body.user_id).first()
@@ -405,7 +405,7 @@ def delete_user_share(request, report_id: int, body: DeleteUserShareRequest):
     report = DynamicReport.objects.filter(pk=report_id).first()
     if not report:
         return 404, make_not_found("Report", str(report_id))
-    if not is_owner(report, request.user) and not request.user.has_perm("sanjaya.can_manage_shares_any"):
+    if not is_owner(report, request.user) and not request.user.has_perm("sanjaya_ninja.can_manage_shares_any"):
         return 403, make_permission_error()
 
     DynamicReportUserShare.objects.filter(
@@ -427,7 +427,7 @@ def upsert_group_share(request, report_id: int, body: UpsertGroupShareRequest):
     report = DynamicReport.objects.filter(pk=report_id).first()
     if not report:
         return 404, make_not_found("Report", str(report_id))
-    if not is_owner(report, request.user) and not request.user.has_perm("sanjaya.can_manage_shares_any"):
+    if not is_owner(report, request.user) and not request.user.has_perm("sanjaya_ninja.can_manage_shares_any"):
         return 403, make_permission_error()
 
     group = Group.objects.filter(pk=body.group_id).first()
@@ -455,7 +455,7 @@ def delete_group_share(request, report_id: int, body: DeleteGroupShareRequest):
     report = DynamicReport.objects.filter(pk=report_id).first()
     if not report:
         return 404, make_not_found("Report", str(report_id))
-    if not is_owner(report, request.user) and not request.user.has_perm("sanjaya.can_manage_shares_any"):
+    if not is_owner(report, request.user) and not request.user.has_perm("sanjaya_ninja.can_manage_shares_any"):
         return 403, make_permission_error()
 
     DynamicReportGroupShare.objects.filter(

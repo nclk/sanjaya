@@ -9,14 +9,14 @@ from django.apps import AppConfig
 logger = logging.getLogger(__name__)
 
 
-class SanjayaConfig(AppConfig):
-    name = "sanjaya"
+class SanjayaNinjaConfig(AppConfig):
+    name = "sanjaya_ninja"
     verbose_name = "Sanjaya Dynamic Reporting"
     default_auto_field = "django.db.models.BigAutoField"
 
     def ready(self) -> None:
-        from sanjaya.conf import get_providers_modules
-        from sanjaya.registry import registry
+        from sanjaya_ninja.conf import get_providers_modules
+        from sanjaya_ninja.registry import registry
 
         for module_path in get_providers_modules():
             try:

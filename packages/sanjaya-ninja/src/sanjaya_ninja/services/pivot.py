@@ -26,8 +26,8 @@ from sanjaya_core.types import (
     ValueSpec,
 )
 
-from sanjaya.schemas.filters import parse_ag_grid_filter_model
-from sanjaya.schemas.pivot import (
+from sanjaya_ninja.schemas.filters import parse_ag_grid_filter_model
+from sanjaya_ninja.schemas.pivot import (
     ServerSideGetRowsRequest,
     ServerSideGetRowsResponse,
 )

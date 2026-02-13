@@ -45,7 +45,7 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('permission', models.CharField(choices=[('viewer', 'Viewer'), ('editor', 'Editor')], default='viewer', max_length=10)),
                 ('group', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sanjaya_shared_reports', to='auth.group')),
-                ('report', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='group_shares', to='sanjaya.dynamicreport')),
+                ('report', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='group_shares', to='sanjaya_ninja.dynamicreport')),
             ],
             options={
                 'default_permissions': (),
@@ -57,7 +57,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('permission', models.CharField(choices=[('viewer', 'Viewer'), ('editor', 'Editor')], default='viewer', max_length=10)),
-                ('report', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='user_shares', to='sanjaya.dynamicreport')),
+                ('report', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='user_shares', to='sanjaya_ninja.dynamicreport')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sanjaya_shared_reports', to=settings.AUTH_USER_MODEL)),
             ],
             options={
