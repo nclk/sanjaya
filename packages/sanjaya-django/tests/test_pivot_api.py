@@ -12,31 +12,31 @@ class TestPivotAPI:
         resp = client.post(
             "/datasets/test_trades/pivot",
             json={
-                "start_row": 0,
-                "end_row": 100,
-                "row_group_cols": [
-                    {"id": "region", "display_name": "Region", "field": "region"}
+                "startRow": 0,
+                "endRow": 100,
+                "rowGroupCols": [
+                    {"id": "region", "displayName": "Region", "field": "region"}
                 ],
-                "group_keys": [],
-                "value_cols": [
+                "groupKeys": [],
+                "valueCols": [
                     {
                         "id": "amount",
-                        "display_name": "Amount",
+                        "displayName": "Amount",
                         "field": "amount",
-                        "agg_func": "sum",
+                        "aggFunc": "sum",
                     }
                 ],
-                "pivot_cols": [],
-                "pivot_mode": False,
-                "sort_model": [],
-                "filter_model": {},
+                "pivotCols": [],
+                "pivotMode": False,
+                "sortModel": [],
+                "filterModel": {},
             },
             user=user,
         )
         assert resp.status_code == 200
         data = resp.json()
-        assert data["row_count"] == 2
-        by_region = {r["region"]: r for r in data["row_data"]}
+        assert data["rowCount"] == 2
+        by_region = {r["region"]: r for r in data["rowData"]}
         # North: 100 + 200 + 120 = 420
         assert by_region["North"]["sum_amount"] == 420
 
@@ -45,63 +45,63 @@ class TestPivotAPI:
         resp = client.post(
             "/datasets/test_trades/pivot",
             json={
-                "start_row": 0,
-                "end_row": 100,
-                "row_group_cols": [
-                    {"id": "region", "display_name": "Region", "field": "region"}
+                "startRow": 0,
+                "endRow": 100,
+                "rowGroupCols": [
+                    {"id": "region", "displayName": "Region", "field": "region"}
                 ],
-                "group_keys": [],
-                "value_cols": [
+                "groupKeys": [],
+                "valueCols": [
                     {
                         "id": "amount",
-                        "display_name": "Amount",
+                        "displayName": "Amount",
                         "field": "amount",
-                        "agg_func": "sum",
+                        "aggFunc": "sum",
                     }
                 ],
-                "pivot_cols": [
-                    {"id": "product", "display_name": "Product", "field": "product"}
+                "pivotCols": [
+                    {"id": "product", "displayName": "Product", "field": "product"}
                 ],
-                "pivot_mode": True,
+                "pivotMode": True,
             },
             user=user,
         )
         assert resp.status_code == 200
         data = resp.json()
-        assert data["pivot_result_fields"] is not None
-        assert len(data["pivot_result_fields"]) > 0
-        assert data["row_count"] == 2
+        assert data["pivotResultFields"] is not None
+        assert len(data["pivotResultFields"]) > 0
+        assert data["rowCount"] == 2
 
     def test_drill_down_with_group_keys(self, client, user, mock_provider):
         """Drill into region=North — should return the next group level."""
         resp = client.post(
             "/datasets/test_trades/pivot",
             json={
-                "start_row": 0,
-                "end_row": 100,
-                "row_group_cols": [
-                    {"id": "region", "display_name": "Region", "field": "region"},
-                    {"id": "product", "display_name": "Product", "field": "product"},
+                "startRow": 0,
+                "endRow": 100,
+                "rowGroupCols": [
+                    {"id": "region", "displayName": "Region", "field": "region"},
+                    {"id": "product", "displayName": "Product", "field": "product"},
                 ],
-                "group_keys": ["North"],
-                "value_cols": [
+                "groupKeys": ["North"],
+                "valueCols": [
                     {
                         "id": "amount",
-                        "display_name": "Amount",
+                        "displayName": "Amount",
                         "field": "amount",
-                        "agg_func": "sum",
+                        "aggFunc": "sum",
                     }
                 ],
-                "pivot_cols": [],
-                "pivot_mode": False,
+                "pivotCols": [],
+                "pivotMode": False,
             },
             user=user,
         )
         assert resp.status_code == 200
         data = resp.json()
         # North has Widget and Gadget
-        assert data["row_count"] == 2
-        products = {r["product"] for r in data["row_data"]}
+        assert data["rowCount"] == 2
+        products = {r["product"] for r in data["rowData"]}
         assert products == {"Widget", "Gadget"}
 
     def test_pivot_not_supported(self, client, user):
@@ -123,13 +123,13 @@ class TestPivotAPI:
         resp = client.post(
             "/datasets/no_pivot/pivot",
             json={
-                "start_row": 0,
-                "end_row": 10,
-                "row_group_cols": [],
-                "group_keys": [],
-                "value_cols": [],
-                "pivot_cols": [{"id": "x", "display_name": "X"}],
-                "pivot_mode": True,
+                "startRow": 0,
+                "endRow": 10,
+                "rowGroupCols": [],
+                "groupKeys": [],
+                "valueCols": [],
+                "pivotCols": [{"id": "x", "displayName": "X"}],
+                "pivotMode": True,
             },
             user=user,
         )
@@ -139,13 +139,13 @@ class TestPivotAPI:
         resp = client.post(
             "/datasets/nope/pivot",
             json={
-                "start_row": 0,
-                "end_row": 10,
-                "row_group_cols": [],
-                "group_keys": [],
-                "value_cols": [],
-                "pivot_cols": [],
-                "pivot_mode": False,
+                "startRow": 0,
+                "endRow": 10,
+                "rowGroupCols": [],
+                "groupKeys": [],
+                "valueCols": [],
+                "pivotCols": [],
+                "pivotMode": False,
             },
             user=user,
         )

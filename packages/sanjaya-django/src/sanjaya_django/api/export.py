@@ -12,7 +12,7 @@ from sanjaya_django.schemas.errors import CustomErrorResponse, ErrorDetail, make
 from sanjaya_django.schemas.export import ExportRequest
 from sanjaya_django.services.export import handle_export
 
-router = Router(tags=["export"])
+router = Router(tags=["export"], by_alias=True)
 
 
 @router.post(

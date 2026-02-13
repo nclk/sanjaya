@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from ninja import Schema
-
 from sanjaya_core.enums import (
     AggFunc,
     ColumnType,
@@ -12,37 +10,39 @@ from sanjaya_core.enums import (
     FormatHintKind,
 )
 
+from sanjaya_django.schemas import CamelSchema
+
 
 # ---------------------------------------------------------------------------
 # Column metadata (mirrors sanjaya_core.types.ColumnMeta for the wire)
 # ---------------------------------------------------------------------------
 
 
-class CurrencyOptionsOut(Schema):
+class CurrencyOptionsOut(CamelSchema):
     default_unit: str | None = None
     supported_units: list[str] | None = None
     default_magnitude: str | None = None
     supported_magnitudes: list[str] | None = None
 
 
-class FormatHintsOut(Schema):
+class FormatHintsOut(CamelSchema):
     kind: FormatHintKind
     decimals: int | None = None
     currency_code: str | None = None
     currency_code_column: str | None = None
 
 
-class PivotAggOptionOut(Schema):
+class PivotAggOptionOut(CamelSchema):
     agg: AggFunc
     label: str
 
 
-class ColumnPivotOptionsOut(Schema):
+class ColumnPivotOptionsOut(CamelSchema):
     role: str | None = None
     allowed_aggs: list[PivotAggOptionOut] | None = None
 
 
-class ColumnOut(Schema):
+class ColumnOut(CamelSchema):
     name: str
     label: str
     type: ColumnType
@@ -56,7 +56,7 @@ class ColumnOut(Schema):
     filter_style: FilterStyle | None = None
 
 
-class ColumnsResponse(Schema):
+class ColumnsResponse(CamelSchema):
     columns: list[ColumnOut]
 
 
@@ -65,18 +65,18 @@ class ColumnsResponse(Schema):
 # ---------------------------------------------------------------------------
 
 
-class DatasetCapabilitiesOut(Schema):
+class DatasetCapabilitiesOut(CamelSchema):
     pivot: bool
 
 
-class DatasetOut(Schema):
+class DatasetOut(CamelSchema):
     key: str
     label: str
     description: str
     capabilities: DatasetCapabilitiesOut
 
 
-class DatasetsResponse(Schema):
+class DatasetsResponse(CamelSchema):
     datasets: list[DatasetOut]
 
 
@@ -85,14 +85,14 @@ class DatasetsResponse(Schema):
 # ---------------------------------------------------------------------------
 
 
-class PreviewRequest(Schema):
+class PreviewRequest(CamelSchema):
     selected_columns: list[str]
     filter: dict | None = None  # raw FilterGroup JSON
     limit: int = 100
     offset: int = 0
 
 
-class PreviewResponse(Schema):
+class PreviewResponse(CamelSchema):
     columns: list[str]
     rows: list[dict]
     total: int | None = None

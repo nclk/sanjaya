@@ -20,7 +20,7 @@ from sanjaya_django.schemas.datasets import (
 from sanjaya_django.schemas.errors import CustomErrorResponse, ErrorDetail, make_not_found
 from sanjaya_django.schemas.filters import parse_filter_group
 
-router = Router(tags=["datasets"])
+router = Router(tags=["datasets"], by_alias=True)
 
 
 # ---------------------------------------------------------------------------

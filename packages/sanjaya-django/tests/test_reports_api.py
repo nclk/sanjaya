@@ -40,7 +40,7 @@ class TestReportsCRUD:
         data = resp.json()
         assert data["title"] == "New Report"
         assert data["status"] == "draft"
-        assert data["created_by"]["id"] == str(user.pk)
+        assert data["createdBy"]["id"] == str(user.pk)
 
     def test_get_report(self, client, user, report):
         resp = client.get(f"/reports/{report.pk}", user=user)
@@ -156,7 +156,7 @@ class TestReportsSharing:
     def test_upsert_and_list_user_share(self, client, user, other_user, report):
         resp = client.post(
             f"/reports/{report.pk}/shares/users",
-            json={"user_id": str(other_user.pk), "permission": "viewer"},
+            json={"userId": str(other_user.pk), "permission": "viewer"},
             user=user,
         )
         assert resp.status_code == 200
@@ -168,13 +168,13 @@ class TestReportsSharing:
         # Create share first
         client.post(
             f"/reports/{report.pk}/shares/users",
-            json={"user_id": str(other_user.pk), "permission": "viewer"},
+            json={"userId": str(other_user.pk), "permission": "viewer"},
             user=user,
         )
         # Delete
         resp = client.delete(
             f"/reports/{report.pk}/shares/users",
-            json={"user_id": str(other_user.pk)},
+            json={"userId": str(other_user.pk)},
             user=user,
         )
         assert resp.status_code == 200

@@ -36,7 +36,7 @@ class TestDatasetsAPI:
         resp = client.post(
             "/datasets/test_trades/preview",
             json={
-                "selected_columns": ["year", "region", "amount"],
+                "selectedColumns": ["year", "region", "amount"],
                 "limit": 3,
                 "offset": 0,
             },
@@ -52,7 +52,7 @@ class TestDatasetsAPI:
         resp = client.post(
             "/datasets/test_trades/preview",
             json={
-                "selected_columns": ["year", "amount"],
+                "selectedColumns": ["year", "amount"],
                 "filter": {
                     "combinator": "and",
                     "conditions": [

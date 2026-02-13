@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Literal
 
-from ninja import Schema
+from sanjaya_django.schemas import CamelSchema
 
 
 # ---------------------------------------------------------------------------
@@ -13,7 +13,7 @@ from ninja import Schema
 # ---------------------------------------------------------------------------
 
 
-class UserReferenceOut(Schema):
+class UserReferenceOut(CamelSchema):
     id: str
     name: str
     email: str | None = None
@@ -24,7 +24,7 @@ class UserReferenceOut(Schema):
 # ---------------------------------------------------------------------------
 
 
-class DynamicReportOut(Schema):
+class DynamicReportOut(CamelSchema):
     id: int
     title: str
     description: str
@@ -42,7 +42,7 @@ class DynamicReportOut(Schema):
     metadata: dict | None = None
 
 
-class DynamicReportSummaryOut(Schema):
+class DynamicReportSummaryOut(CamelSchema):
     id: int
     title: str
     status: str
@@ -53,39 +53,39 @@ class DynamicReportSummaryOut(Schema):
     metadata: dict | None = None
 
 
-class ListDynamicReportsResponse(Schema):
+class ListDynamicReportsResponse(CamelSchema):
     reports: list[DynamicReportSummaryOut]
     total: int
     limit: int
     offset: int
 
 
-class CreateDynamicReportRequest(Schema):
+class CreateDynamicReportRequest(CamelSchema):
     title: str
     description: str = ""
     tags: list[str] = []
     metadata: dict | None = None
 
 
-class UpdateDynamicReportRequest(Schema):
+class UpdateDynamicReportRequest(CamelSchema):
     title: str | None = None
     description: str | None = None
     tags: list[str] | None = None
     metadata: dict | None = None
 
 
-class PerformActionRequest(Schema):
+class PerformActionRequest(CamelSchema):
     action: str
     reason: str | None = None
     target_user_id: str | None = None
 
 
-class ActionResponse(Schema):
+class ActionResponse(CamelSchema):
     report: DynamicReportOut | None = None
     message: str
 
 
-class DynamicReportStatsOut(Schema):
+class DynamicReportStatsOut(CamelSchema):
     total: int
     drafts: int
     published: int
@@ -98,35 +98,35 @@ class DynamicReportStatsOut(Schema):
 # ---------------------------------------------------------------------------
 
 
-class UserShareOut(Schema):
+class UserShareOut(CamelSchema):
     user: UserReferenceOut
     permission: str
 
 
-class GroupShareOut(Schema):
+class GroupShareOut(CamelSchema):
     group_id: str
     group_name: str
     permission: str
 
 
-class ListSharesResponse(Schema):
+class ListSharesResponse(CamelSchema):
     users: list[UserShareOut]
     groups: list[GroupShareOut]
 
 
-class UpsertUserShareRequest(Schema):
+class UpsertUserShareRequest(CamelSchema):
     user_id: str
     permission: Literal["viewer", "editor"]
 
 
-class DeleteUserShareRequest(Schema):
+class DeleteUserShareRequest(CamelSchema):
     user_id: str
 
 
-class UpsertGroupShareRequest(Schema):
+class UpsertGroupShareRequest(CamelSchema):
     group_id: str
     permission: Literal["viewer", "editor"]
 
 
-class DeleteGroupShareRequest(Schema):
+class DeleteGroupShareRequest(CamelSchema):
     group_id: str

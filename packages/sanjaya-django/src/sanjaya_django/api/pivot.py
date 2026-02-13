@@ -18,7 +18,7 @@ from sanjaya_django.schemas.pivot import (
 )
 from sanjaya_django.services.pivot import handle_ssrm_request
 
-router = Router(tags=["pivot"])
+router = Router(tags=["pivot"], by_alias=True)
 
 
 @router.post(

@@ -4,12 +4,12 @@ from __future__ import annotations
 
 from typing import Any
 
-from ninja import Schema
-
 from sanjaya_core.enums import AggFunc, ExportFormat
 
+from sanjaya_django.schemas import CamelSchema
 
-class ColumnVOExport(Schema):
+
+class ColumnVOExport(CamelSchema):
     """Same shape as pivot ColumnVO, reused for export requests."""
 
     id: str
@@ -18,18 +18,18 @@ class ColumnVOExport(Schema):
     agg_func: AggFunc | None = None
 
 
-class SortModelItemExport(Schema):
+class SortModelItemExport(CamelSchema):
     col_id: str
     sort: str
 
 
-class FlatExportRequest(Schema):
+class FlatExportRequest(CamelSchema):
     selected_columns: list[str]
     filter: dict | None = None  # raw FilterGroup JSON
     format: ExportFormat
 
 
-class PivotExportRequest(Schema):
+class PivotExportRequest(CamelSchema):
     row_group_cols: list[ColumnVOExport]
     value_cols: list[ColumnVOExport]
     pivot_cols: list[ColumnVOExport]
@@ -38,6 +38,6 @@ class PivotExportRequest(Schema):
     format: ExportFormat
 
 
-class ExportRequest(Schema):
+class ExportRequest(CamelSchema):
     flat: FlatExportRequest | None = None
     pivot: PivotExportRequest | None = None

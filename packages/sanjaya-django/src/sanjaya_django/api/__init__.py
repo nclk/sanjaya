@@ -16,7 +16,7 @@ from sanjaya_django.api.export import router as export_router
 from sanjaya_django.api.pivot import router as pivot_router
 from sanjaya_django.api.reports import router as reports_router
 
-router = Router()
+router = Router(by_alias=True)
 
 router.add_router("/datasets", datasets_router)
 router.add_router("/datasets", pivot_router)   # /datasets/{key}/pivot

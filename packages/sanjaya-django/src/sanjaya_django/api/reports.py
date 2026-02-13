@@ -48,7 +48,7 @@ from sanjaya_django.services.reports import (
     user_ref,
 )
 
-router = Router(tags=["reports"])
+router = Router(tags=["reports"], by_alias=True)
 User = get_user_model()
 
 

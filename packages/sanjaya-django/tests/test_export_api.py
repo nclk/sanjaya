@@ -15,7 +15,7 @@ class TestExportAPI:
             "/datasets/test_trades/export",
             json={
                 "flat": {
-                    "selected_columns": ["year", "region", "amount"],
+                    "selectedColumns": ["year", "region", "amount"],
                     "format": "csv",
                 }
             },
@@ -36,7 +36,7 @@ class TestExportAPI:
             "/datasets/test_trades/export",
             json={
                 "flat": {
-                    "selected_columns": ["year", "amount"],
+                    "selectedColumns": ["year", "amount"],
                     "format": "xlsx",
                 }
             },
@@ -50,19 +50,19 @@ class TestExportAPI:
             "/datasets/test_trades/export",
             json={
                 "pivot": {
-                    "row_group_cols": [
-                        {"id": "region", "display_name": "Region", "field": "region"}
+                    "rowGroupCols": [
+                        {"id": "region", "displayName": "Region", "field": "region"}
                     ],
-                    "value_cols": [
+                    "valueCols": [
                         {
                             "id": "amount",
-                            "display_name": "Amount",
+                            "displayName": "Amount",
                             "field": "amount",
-                            "agg_func": "sum",
+                            "aggFunc": "sum",
                         }
                     ],
-                    "pivot_cols": [
-                        {"id": "product", "display_name": "Product", "field": "product"}
+                    "pivotCols": [
+                        {"id": "product", "displayName": "Product", "field": "product"}
                     ],
                     "format": "csv",
                 }
@@ -86,7 +86,7 @@ class TestExportAPI:
     def test_dataset_not_found(self, client, user):
         resp = client.post(
             "/datasets/nope/export",
-            json={"flat": {"selected_columns": ["x"], "format": "csv"}},
+            json={"flat": {"selectedColumns": ["x"], "format": "csv"}},
             user=user,
         )
         assert resp.status_code == 404
