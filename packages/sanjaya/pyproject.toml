@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "sanjaya"
-version = "0.1.0"
+version = "0.1.1"
 description = "Django Ninja app for dynamic reporting with pluggable data providers"
 readme = "README.md"
 requires-python = ">=3.12"

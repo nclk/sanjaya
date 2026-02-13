@@ -771,7 +771,7 @@ wheels = [
 
 [[package]]
 name = "sanjaya"
-version = "0.1.0"
+version = "0.1.1"
 source = { editable = "packages/sanjaya" }
 dependencies = [
     { name = "django" },
@@ -801,7 +801,7 @@ provides-extras = ["dev"]
 
 [[package]]
 name = "sanjaya-core"
-version = "0.1.0"
+version = "0.1.1"
 source = { editable = "packages/sanjaya-core" }
 dependencies = [
     { name = "pydantic" },
@@ -823,7 +823,7 @@ provides-extras = ["dev"]
 
 [[package]]
 name = "sanjaya-sqlalchemy"
-version = "0.1.0"
+version = "0.1.1"
 source = { editable = "packages/sanjaya-sqlalchemy" }
 dependencies = [
     { name = "sanjaya-core" },

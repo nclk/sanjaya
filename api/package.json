@@ -1,6 +1,6 @@
 {
   "name": "@pojagi/sanjaya-api",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "TypeSpec definitions for the Sanjaya Dynamic Reporting API",
   "publishConfig": {
     "access": "public"
