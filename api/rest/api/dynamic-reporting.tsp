@@ -2,12 +2,9 @@ import "@typespec/http";
 import "../../models/dynamic-reports.tsp";
 using TypeSpec.Http;
 using Models;
-namespace Rest.Api.V1;
-@service(#{
-  title: "Sanjaya Dynamic Reporting API",
-})
+
 @route("/reporting")
-namespace DynamicReporting {
+namespace Rest.Api.V1.DynamicReporting {
   @route("/reports")
   namespace Reports {
     @doc("List saved dynamic reports")
