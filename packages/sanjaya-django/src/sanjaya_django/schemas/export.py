@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from pydantic import Field
+
 from sanjaya_core.enums import AggFunc, ExportFormat
 
 from sanjaya_django.schemas import CamelSchema
@@ -24,7 +26,7 @@ class SortModelItemExport(CamelSchema):
 
 
 class FlatExportRequest(CamelSchema):
-    selected_columns: list[str]
+    selected_columns: list[str] = Field(min_length=1)
     filter: dict | None = None  # raw FilterGroup JSON
     format: ExportFormat
 

@@ -75,6 +75,14 @@ class TestExportAPI:
         rows = list(reader)
         assert len(rows) == 2  # North, South
 
+    def test_flat_export_empty_selected_columns_rejected(self, client, user, mock_provider):
+        resp = client.post(
+            "/datasets/test_trades/export",
+            json={"flat": {"selectedColumns": [], "format": "csv"}},
+            user=user,
+        )
+        assert resp.status_code == 422
+
     def test_empty_request_returns_400(self, client, user, mock_provider):
         resp = client.post(
             "/datasets/test_trades/export",

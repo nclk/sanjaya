@@ -48,6 +48,14 @@ class TestDatasetsAPI:
         assert len(data["rows"]) == 3
         assert data["total"] == 5
 
+    def test_preview_empty_selected_columns_rejected(self, client, user, mock_provider):
+        resp = client.post(
+            "/datasets/test_trades/preview",
+            json={"selectedColumns": [], "limit": 10, "offset": 0},
+            user=user,
+        )
+        assert resp.status_code == 422
+
     def test_preview_with_filter(self, client, user, mock_provider):
         resp = client.post(
             "/datasets/test_trades/preview",

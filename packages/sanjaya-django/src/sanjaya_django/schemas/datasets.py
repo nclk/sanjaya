@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pydantic import Field
+
 from sanjaya_core.enums import (
     AggFunc,
     ColumnType,
@@ -86,7 +88,7 @@ class DatasetsResponse(CamelSchema):
 
 
 class PreviewRequest(CamelSchema):
-    selected_columns: list[str]
+    selected_columns: list[str] = Field(min_length=1)
     filter: dict | None = None  # raw FilterGroup JSON
     limit: int = 100
     offset: int = 0
