@@ -2,6 +2,10 @@
 
 __version__ = "1.0.0"
 
-from sanjaya_sqlalchemy.provider import SQLAlchemyProvider
+from sanjaya_sqlalchemy.provider import (
+    SQLAlchemyProvider,
+    columns_from_selectable,
+    infer_column_type,
+)
 
-__all__ = ["SQLAlchemyProvider"]
+__all__ = ["SQLAlchemyProvider", "columns_from_selectable", "infer_column_type"]

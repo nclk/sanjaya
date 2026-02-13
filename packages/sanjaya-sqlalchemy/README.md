@@ -66,6 +66,36 @@ provider = SQLAlchemyProvider(
 )
 ```
 
+### Fully deferred setup (recommended for Django integrations)
+
+Both `engine` and `selectable` accept callables.  When `selectable` is a
+callable it receives the materialised engine — perfect for
+`autoload_with=engine`.  Omit `columns` to have them auto-inferred from
+the reflected table:
+
+```python
+import sqlalchemy as sa
+from sqlalchemy import create_engine
+from sanjaya_sqlalchemy import SQLAlchemyProvider
+
+provider = SQLAlchemyProvider(
+    key="trade_activity",
+    label="Trade Activity",
+    engine=lambda: create_engine("postgresql://..."),
+    selectable=lambda engine: sa.Table(
+        "trade_activity", sa.MetaData(), autoload_with=engine,
+    ),
+    # columns omitted → auto-inferred from reflected table
+)
+```
+
+Nothing touches the database until the first `query()`, `aggregate()`, or
+`get_columns()` call.  Column types are mapped automatically (e.g.
+`sa.Integer` → `ColumnType.NUMBER`, `sa.DateTime` → `ColumnType.DATETIME`).
+
+When you need custom labels, pivot options, or format hints, pass `columns`
+explicitly — they still work with a callable selectable.
+
 This pairs well with the `ProviderRegistry.add_lazy()` API in
 `sanjaya-django` for fully deferred provider setup.
 ```

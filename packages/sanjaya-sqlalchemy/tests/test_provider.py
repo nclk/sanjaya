@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import sqlalchemy as sa
 
-from sanjaya_core.enums import AggFunc, FilterOperator, SortDirection
+from sanjaya_core.enums import AggFunc, ColumnType, FilterOperator, SortDirection
 from sanjaya_core.filters import FilterCondition, FilterGroup
-from sanjaya_core.types import SortSpec, ValueSpec
+from sanjaya_core.types import ColumnMeta, SortSpec, ValueSpec
 
-from sanjaya_sqlalchemy import SQLAlchemyProvider
+from sanjaya_sqlalchemy import SQLAlchemyProvider, columns_from_selectable, infer_column_type
 
 
 # ---------------------------------------------------------------------------
@@ -377,3 +377,235 @@ class TestLazyEngine:
         # Subsequent queries reuse the engine — factory is not called again.
         p.query(["id"])
         assert call_count == 1
+
+
+# ---------------------------------------------------------------------------
+# Callable selectable
+# ---------------------------------------------------------------------------
+
+
+class TestCallableSelectable:
+    """selectable can be a callable that receives the engine."""
+
+    def test_nothing_called_at_init(self) -> None:
+        """Neither engine nor selectable factories run during __init__."""
+        engine_called = False
+        selectable_called = False
+
+        def engine_factory() -> sa.engine.Engine:
+            nonlocal engine_called
+            engine_called = True
+            return sa.create_engine("sqlite:///:memory:")
+
+        def selectable_factory(eng: sa.engine.Engine) -> sa.Table:
+            nonlocal selectable_called
+            selectable_called = True
+            return sa.Table("x", sa.MetaData(), sa.Column("id", sa.Integer))
+
+        SQLAlchemyProvider(
+            key="deferred",
+            label="Deferred",
+            engine=engine_factory,
+            selectable=selectable_factory,
+        )
+        assert not engine_called
+        assert not selectable_called
+
+    def test_selectable_receives_engine(
+        self, engine: sa.engine.Engine, trades_table: sa.Table,
+    ) -> None:
+        """The selectable callable receives the materialised engine."""
+        from tests.conftest import COLUMN_DEFS
+
+        received_engine = None
+
+        def selectable_factory(eng: sa.engine.Engine) -> sa.Table:
+            nonlocal received_engine
+            received_engine = eng
+            return trades_table
+
+        p = SQLAlchemyProvider(
+            key="cb_sel",
+            label="CB Selectable",
+            engine=engine,
+            selectable=selectable_factory,
+            columns=COLUMN_DEFS,
+        )
+        result = p.query(["id", "desk"])
+        assert received_engine is engine
+        assert result.total == 7
+
+    def test_autoload_with_pattern(self, engine: sa.engine.Engine) -> None:
+        """Simulates the autoload_with=engine pattern."""
+        p = SQLAlchemyProvider(
+            key="autoloaded",
+            label="Autoloaded",
+            engine=engine,
+            selectable=lambda eng: sa.Table(
+                "trades", sa.MetaData(), autoload_with=eng,
+            ),
+        )
+        # columns auto-inferred from the reflected table
+        cols = p.get_columns()
+        col_names = [c.name for c in cols]
+        assert "id" in col_names
+        assert "desk" in col_names
+        assert "amount" in col_names
+
+        result = p.query(col_names)
+        assert result.total == 7
+
+    def test_callable_selectable_with_select_base(
+        self, engine: sa.engine.Engine,
+    ) -> None:
+        """Callable can return a SelectBase that gets auto-subqueried."""
+
+        def factory(eng: sa.engine.Engine) -> sa.SelectBase:
+            table = sa.Table("trades", sa.MetaData(), autoload_with=eng)
+            return sa.select(table).where(table.c.desk == "FX")
+
+        p = SQLAlchemyProvider(
+            key="cb_select",
+            label="CB Select",
+            engine=engine,
+            selectable=factory,
+        )
+        result = p.query([c.name for c in p.get_columns()])
+        assert result.total == 4
+        assert all(r["desk"] == "FX" for r in result.rows)
+
+
+# ---------------------------------------------------------------------------
+# Auto-inferred columns
+# ---------------------------------------------------------------------------
+
+
+class TestAutoInferredColumns:
+    """columns=None auto-derives ColumnMeta from the selectable."""
+
+    def test_infer_column_type_mapping(self) -> None:
+        assert infer_column_type(sa.Integer()) == ColumnType.NUMBER
+        assert infer_column_type(sa.Float()) == ColumnType.NUMBER
+        assert infer_column_type(sa.Numeric()) == ColumnType.NUMBER
+        assert infer_column_type(sa.String(50)) == ColumnType.STRING
+        assert infer_column_type(sa.Text()) == ColumnType.STRING
+        assert infer_column_type(sa.Boolean()) == ColumnType.BOOLEAN
+        assert infer_column_type(sa.Date()) == ColumnType.DATE
+        assert infer_column_type(sa.DateTime()) == ColumnType.DATETIME
+        # Unknown types fall back to STRING
+        assert infer_column_type(sa.LargeBinary()) == ColumnType.STRING
+
+    def test_columns_from_selectable(self) -> None:
+        metadata = sa.MetaData()
+        table = sa.Table(
+            "test",
+            metadata,
+            sa.Column("user_id", sa.Integer, primary_key=True),
+            sa.Column("full_name", sa.String(100)),
+            sa.Column("is_active", sa.Boolean),
+        )
+        cols = columns_from_selectable(table)
+        assert len(cols) == 3
+
+        by_name = {c.name: c for c in cols}
+        assert by_name["user_id"].type == ColumnType.NUMBER
+        assert by_name["user_id"].label == "User Id"
+        assert by_name["full_name"].type == ColumnType.STRING
+        assert by_name["full_name"].label == "Full Name"
+        assert by_name["is_active"].type == ColumnType.BOOLEAN
+
+    def test_omitted_columns_inferred(
+        self, engine: sa.engine.Engine, trades_table: sa.Table,
+    ) -> None:
+        """Provider with columns=None derives them from the table."""
+        p = SQLAlchemyProvider(
+            key="inferred",
+            label="Inferred",
+            engine=engine,
+            selectable=trades_table,
+        )
+        cols = p.get_columns()
+        col_names = [c.name for c in cols]
+        assert "id" in col_names
+        assert "desk" in col_names
+        assert "amount" in col_names
+
+        # Types should be inferred correctly
+        by_name = {c.name: c for c in cols}
+        assert by_name["id"].type == ColumnType.NUMBER
+        assert by_name["desk"].type == ColumnType.STRING
+        assert by_name["amount"].type == ColumnType.NUMBER  # Float → NUMBER
+
+    def test_explicit_columns_override_inference(
+        self, engine: sa.engine.Engine, trades_table: sa.Table,
+    ) -> None:
+        """When columns are provided explicitly, inference is skipped."""
+        custom_cols = [
+            ColumnMeta(name="id", label="Trade ID", type=ColumnType.NUMBER),
+        ]
+        p = SQLAlchemyProvider(
+            key="explicit",
+            label="Explicit",
+            engine=engine,
+            selectable=trades_table,
+            columns=custom_cols,
+        )
+        cols = p.get_columns()
+        assert len(cols) == 1
+        assert cols[0].label == "Trade ID"
+
+
+# ---------------------------------------------------------------------------
+# Fully deferred setup (engine + selectable + columns all lazy)
+# ---------------------------------------------------------------------------
+
+
+class TestFullyDeferredSetup:
+    """The complete deferred pattern: nothing touches the DB until first use."""
+
+    def test_fully_deferred_query(self, engine: sa.engine.Engine) -> None:
+        engine_calls = 0
+
+        def engine_factory() -> sa.engine.Engine:
+            nonlocal engine_calls
+            engine_calls += 1
+            return engine
+
+        p = SQLAlchemyProvider(
+            key="full_lazy",
+            label="Full Lazy",
+            engine=engine_factory,
+            selectable=lambda eng: sa.Table(
+                "trades", sa.MetaData(), autoload_with=eng,
+            ),
+        )
+
+        assert engine_calls == 0
+
+        cols = p.get_columns()
+        assert engine_calls == 1
+        assert len(cols) >= 6
+
+        result = p.query([c.name for c in cols])
+        assert result.total == 7
+        # Engine factory should only have been called once.
+        assert engine_calls == 1
+
+    def test_fully_deferred_aggregate(self, engine: sa.engine.Engine) -> None:
+        p = SQLAlchemyProvider(
+            key="full_lazy_agg",
+            label="Full Lazy Agg",
+            engine=lambda: engine,
+            selectable=lambda eng: sa.Table(
+                "trades", sa.MetaData(), autoload_with=eng,
+            ),
+        )
+        result = p.aggregate(
+            group_by_rows=["desk"],
+            group_by_cols=[],
+            values=[ValueSpec(column="amount", agg=AggFunc.SUM)],
+        )
+        assert result.total == 2
+        sums = {r["desk"]: r["sum_amount"] for r in result.rows}
+        assert sums["FX"] == 5000.0
+        assert sums["Rates"] == 12000.0
