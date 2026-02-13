@@ -57,6 +57,22 @@ class TestQuery:
         amounts = [r["amount"] for r in result.rows]
         assert amounts == sorted(amounts, reverse=True)
 
+    def test_limit_offset_without_explicit_sort(self, provider: SQLAlchemyProvider) -> None:
+        """MSSQL requires ORDER BY when OFFSET is used.
+
+        Even without an explicit sort the provider must add a deterministic
+        fallback ORDER BY so the query doesn't fail on MSSQL / Azure SQL.
+        """
+        r1 = provider.query(["id", "desk"], limit=3, offset=0)
+        r2 = provider.query(["id", "desk"], limit=3, offset=3)
+        assert r1.total == 7
+        # Pages must not overlap and together cover at least 6 rows.
+        ids_1 = {r["id"] for r in r1.rows}
+        ids_2 = {r["id"] for r in r2.rows}
+        assert len(ids_1) == 3
+        assert len(ids_2) == 3
+        assert ids_1.isdisjoint(ids_2)
+
     def test_empty_result(self, provider: SQLAlchemyProvider) -> None:
         fg = FilterGroup(conditions=[
             FilterCondition(column="desk", operator=FilterOperator.EQ, value="Nonexistent"),

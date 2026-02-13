@@ -142,7 +142,7 @@ class SQLAlchemyProvider(DataProvider):
             data_stmt = data_stmt.where(
                 compile_filter_group(filter_group, self._column_lookup)
             )
-        data_stmt = self._apply_sort(data_stmt, sort)
+        data_stmt = self._apply_sort(data_stmt, sort, fallback_columns=cols)
         data_stmt = data_stmt.limit(limit).offset(offset)
 
         with self._engine.connect() as conn:
@@ -239,7 +239,7 @@ class SQLAlchemyProvider(DataProvider):
             data_stmt = data_stmt.where(
                 compile_filter_group(filter_group, self._column_lookup)
             )
-        data_stmt = self._apply_sort(data_stmt, sort)
+        data_stmt = self._apply_sort(data_stmt, sort, fallback_columns=group_cols)
         if limit is not None:
             data_stmt = data_stmt.limit(limit)
         data_stmt = data_stmt.offset(offset)
@@ -353,7 +353,7 @@ class SQLAlchemyProvider(DataProvider):
         )
         if where_clause is not None:
             data_stmt = data_stmt.where(where_clause)
-        data_stmt = self._apply_sort(data_stmt, sort)
+        data_stmt = self._apply_sort(data_stmt, sort, fallback_columns=group_row_cols)
         if limit is not None:
             data_stmt = data_stmt.limit(limit)
         data_stmt = data_stmt.offset(offset)
@@ -372,17 +372,37 @@ class SQLAlchemyProvider(DataProvider):
         self,
         stmt: sa.Select[Any],
         sort: list[SortSpec] | None,
+        fallback_columns: list[ColumnElement[Any]] | None = None,
     ) -> sa.Select[Any]:
-        """Append ORDER BY clauses to *stmt*."""
-        if not sort:
-            return stmt
-        clauses = []
-        for spec in sort:
-            col = self._column_lookup[spec.column]
-            clauses.append(
-                col.desc() if spec.direction == SortDirection.DESC else col.asc()
-            )
-        return stmt.order_by(*clauses)
+        """Append ORDER BY clauses to *stmt*.
+
+        Parameters
+        ----------
+        stmt:
+            The select statement to augment.
+        sort:
+            Explicit sort directives from the caller.
+        fallback_columns:
+            Columns to use as a deterministic fallback when *sort* is
+            empty.  MSSQL / Azure SQL requires an ``ORDER BY`` whenever
+            ``OFFSET`` or a non-simple ``LIMIT`` clause is present;
+            providing a fallback avoids the
+            ``MSSQL requires an order_by when using an OFFSET or a
+            non-simple LIMIT clause`` error.
+        """
+        if sort:
+            clauses = []
+            for spec in sort:
+                col = self._column_lookup[spec.column]
+                clauses.append(
+                    col.desc() if spec.direction == SortDirection.DESC else col.asc()
+                )
+            return stmt.order_by(*clauses)
+
+        if fallback_columns:
+            return stmt.order_by(*[c.asc() for c in fallback_columns])
+
+        return stmt
 
     def _agg_expression(self, vs: ValueSpec) -> ColumnElement[Any]:
         """Build a SQLAlchemy aggregate expression for a :class:`ValueSpec`."""
