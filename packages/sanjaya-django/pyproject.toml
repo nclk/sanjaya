@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "sanjaya-ninja"
+name = "sanjaya-django"
 version = "1.0.0"
 description = "Django Ninja app for dynamic reporting with pluggable data providers"
 readme = "README.md"
@@ -46,7 +46,7 @@ Repository = "https://github.com/tjb1982/sanjaya"
 Issues = "https://github.com/tjb1982/sanjaya/issues"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/sanjaya_ninja"]
+packages = ["src/sanjaya_django"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

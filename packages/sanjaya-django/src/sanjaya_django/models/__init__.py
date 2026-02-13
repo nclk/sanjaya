@@ -1,5 +1,5 @@
-from sanjaya_ninja.models.report import DynamicReport
-from sanjaya_ninja.models.sharing import (
+from sanjaya_django.models.report import DynamicReport
+from sanjaya_django.models.sharing import (
     SHARE_CHOICES,
     DynamicReportGroupShare,
     DynamicReportUserShare,

@@ -24,7 +24,7 @@
 #   pip install sanjaya-core==0.1.0.dev1739378400
 # ──────────────────────────────────────────────────────────────────
 
-PACKAGES := sanjaya-core sanjaya-ninja sanjaya-sqlalchemy
+PACKAGES := sanjaya-core sanjaya-django sanjaya-sqlalchemy
 PKG_DIR   = packages/$(PKG)
 
 # Map package name → directory
@@ -41,6 +41,7 @@ help: ## Show this help
 # ── Single-package targets (require PKG=...) ─────────────────────
 
 build: _require-pkg ## Build sdist + wheel for PKG
+	rm -rf $(PKG_DIR)/dist
 	uv run python -m build $(PKG_DIR)
 
 snapshot: _require-pkg ## Build a .devN snapshot for PKG
@@ -56,7 +57,8 @@ snapshot: _require-pkg ## Build a .devN snapshot for PKG
 	sed -i 's/^version = "$(BASE_VERSION)"/version = "$(SNAP_VERSION)"/' $(TOML)
 	@# Stamp __init__.py
 	sed -i 's/__version__ = "$(BASE_VERSION)"/__version__ = "$(SNAP_VERSION)"/' $(INIT)
-	@# Build
+	@# Build (clean first to avoid stale artifacts)
+	rm -rf $(PKG_DIR)/dist
 	uv run python -m build $(PKG_DIR)
 	@# Revert so snapshot version is never committed
 	sed -i 's/^version = "$(SNAP_VERSION)"/version = "$(BASE_VERSION)"/' $(TOML)
@@ -67,7 +69,7 @@ publish: _require-pkg ## Upload dist/ to PyPI for PKG
 	uv run twine upload $(PKG_DIR)/dist/*
 
 test: _require-pkg ## Run tests for PKG
-	@if [ "$(PKG)" = "sanjaya-ninja" ]; then \
+	@if [ "$(PKG)" = "sanjaya-django" ]; then \
 		DJANGO_SETTINGS_MODULE=tests.settings uv run pytest $(PKG_DIR)/; \
 	else \
 		uv run pytest $(PKG_DIR)/; \
@@ -98,7 +100,7 @@ publish-all: ## Upload all packages to PyPI
 test-all: ## Run tests for all packages
 	@for pkg in $(PACKAGES); do \
 		echo "── Testing $$pkg ──"; \
-		if [ "$$pkg" = "sanjaya-ninja" ]; then \
+		if [ "$$pkg" = "sanjaya-django" ]; then \
 			DJANGO_SETTINGS_MODULE=tests.settings uv run pytest packages/$$pkg/; \
 		else \
 			uv run pytest packages/$$pkg/; \

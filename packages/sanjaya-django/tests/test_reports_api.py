@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 from django.contrib.auth import get_user_model
 
-from sanjaya_ninja.models import DynamicReport
+from sanjaya_django.models import DynamicReport
 
 User = get_user_model()
 
@@ -186,7 +186,7 @@ class TestReportsSharing:
 
     def test_shared_report_visible(self, client, user, other_user, report):
         """After sharing, the other user should be able to view the report."""
-        from sanjaya_ninja.models import DynamicReportUserShare
+        from sanjaya_django.models import DynamicReportUserShare
 
         DynamicReportUserShare.objects.create(
             report=report, user=other_user, permission="viewer"

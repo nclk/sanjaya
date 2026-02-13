@@ -8,13 +8,13 @@ from typing import Any
 from django.contrib.auth.models import AbstractUser, Group
 from django.db.models import Q
 
-from sanjaya_ninja.models import (
+from sanjaya_django.models import (
     DynamicReport,
     DynamicReportGroupShare,
     DynamicReportUserShare,
     Permission,
 )
-from sanjaya_ninja.schemas.reports import UserReferenceOut
+from sanjaya_django.schemas.reports import UserReferenceOut
 
 
 # ---------------------------------------------------------------------------
@@ -23,7 +23,7 @@ from sanjaya_ninja.schemas.reports import UserReferenceOut
 
 
 def _has_perm(user: AbstractUser, codename: str) -> bool:
-    return bool(user.is_superuser) or user.has_perm(f"sanjaya_ninja.{codename}")
+    return bool(user.is_superuser) or user.has_perm(f"sanjaya_django.{codename}")
 
 
 def resolve_effective_permission(

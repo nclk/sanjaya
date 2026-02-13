@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib.auth.models import Group
 from django.db import models
 
-from sanjaya_ninja.models.report import DynamicReport
+from sanjaya_django.models.report import DynamicReport
 
 
 class Permission(models.TextChoices):

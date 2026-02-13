@@ -12,7 +12,7 @@ dev = [
 [tool.uv.workspace]
 members = [
     "packages/sanjaya-core",
-    "packages/sanjaya-ninja",
+    "packages/sanjaya-django",
     "packages/sanjaya-sqlalchemy",
 ]
 
@@ -23,5 +23,5 @@ sanjaya-core = { workspace = true }
 # Each package has its own conftest.py with package-specific fixtures.
 # Run tests per-package to avoid fixture collisions:
 #   pytest packages/sanjaya-core/
-#   DJANGO_SETTINGS_MODULE=tests.settings pytest packages/sanjaya-ninja/
+#   DJANGO_SETTINGS_MODULE=tests.settings pytest packages/sanjaya-django/
 #   pytest packages/sanjaya-sqlalchemy/

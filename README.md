@@ -13,7 +13,7 @@ The project is split into three independently installable packages:
 | Package | Description |
 |---------|-------------|
 | **[sanjaya-core](packages/sanjaya-core/)** | Shared Pydantic types, enums, filter models, the `DataProvider` ABC, and a `MockDataProvider` for testing. No Django or SQLAlchemy dependency. |
-| **[sanjaya-ninja](packages/sanjaya-ninja/)** | Django Ninja app — dataset discovery, filtered previews, AG Grid pivot, CSV/XLSX export, saved-report CRUD with per-user/group sharing and ownership transfer. |
+| **[sanjaya-django](packages/sanjaya-django/)** | Django Ninja app — dataset discovery, filtered previews, AG Grid pivot, CSV/XLSX export, saved-report CRUD with per-user/group sharing and ownership transfer. |
 | **[sanjaya-sqlalchemy](packages/sanjaya-sqlalchemy/)** | `DataProvider` implementation backed by SQLAlchemy Core (no ORM). Compiles filter trees to SQL, supports flat queries, grouped aggregation, and pivot via `CASE WHEN`. |
 
 ## Quick start
@@ -33,7 +33,7 @@ from sanjaya_core.types import (
     ColumnMeta, ColumnPivotOptions, PivotAggOption, DatasetCapabilities,
 )
 from sanjaya_sqlalchemy import SQLAlchemyProvider
-from sanjaya_ninja.registry import ProviderRegistry
+from sanjaya_django.registry import ProviderRegistry
 
 engine = create_engine("postgresql://...")
 metadata = MetaData()
@@ -63,14 +63,14 @@ ProviderRegistry().add(
 
 ```python
 # settings.py
-INSTALLED_APPS = [..., "sanjaya_ninja"]
+INSTALLED_APPS = [..., "sanjaya_django"]
 SANJAYA_PROVIDERS = ["myproject.reporting.datasets"]
 ```
 
 ```python
 # urls.py
 from ninja import NinjaAPI
-from sanjaya_ninja.api import router as reporting_router
+from sanjaya_django.api import router as reporting_router
 
 api = NinjaAPI()
 api.add_router("v1/reporting", reporting_router)
@@ -108,13 +108,13 @@ Each package has its own test suite.  Run them individually:
 ```bash
 pytest packages/sanjaya-core/
 pytest packages/sanjaya-sqlalchemy/
-DJANGO_SETTINGS_MODULE=tests.settings pytest packages/sanjaya-ninja/
+DJANGO_SETTINGS_MODULE=tests.settings pytest packages/sanjaya-django/
 ```
 
 ## Requirements
 
 - Python ≥ 3.12
-- Django ≥ 4.2 (for `sanjaya-ninja`)
+- Django ≥ 4.2 (for `sanjaya-django`)
 - SQLAlchemy ≥ 2.0 (for `sanjaya-sqlalchemy`)
 
 ## Building & publishing

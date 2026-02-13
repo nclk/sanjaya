@@ -5,7 +5,7 @@ requires-python = ">=3.12"
 [manifest]
 members = [
     "sanjaya-core",
-    "sanjaya-ninja",
+    "sanjaya-django",
     "sanjaya-sqlalchemy",
 ]
 
@@ -792,9 +792,9 @@ requires-dist = [
 provides-extras = ["dev"]
 
 [[package]]
-name = "sanjaya-ninja"
+name = "sanjaya-django"
 version = "1.0.0"
-source = { editable = "packages/sanjaya-ninja" }
+source = { editable = "packages/sanjaya-django" }
 dependencies = [
     { name = "django" },
     { name = "django-ninja" },

@@ -1,4 +1,4 @@
-# sanjaya-ninja
+# sanjaya-django
 
 Django Ninja app for dynamic reporting with pluggable data providers.
 
@@ -9,7 +9,7 @@ report management with sharing.
 ## Installation
 
 ```bash
-uv pip install -e "packages/sanjaya-ninja[dev]"
+uv pip install -e "packages/sanjaya-django[dev]"
 ```
 
 ## Quick start
@@ -18,7 +18,7 @@ uv pip install -e "packages/sanjaya-ninja[dev]"
 # settings.py
 INSTALLED_APPS = [
     ...,
-    "sanjaya_ninja",
+    "sanjaya_django",
 ]
 
 SANJAYA_PROVIDERS = [
@@ -29,7 +29,7 @@ SANJAYA_PROVIDERS = [
 ```python
 # urls.py / api.py
 from ninja import NinjaAPI
-from sanjaya_ninja.api import router as reporting_router
+from sanjaya_django.api import router as reporting_router
 
 api = NinjaAPI()
 api.add_router("v1/reporting", reporting_router)

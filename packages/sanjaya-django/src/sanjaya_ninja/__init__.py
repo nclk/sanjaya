@@ -1,4 +1,4 @@
-"""sanjaya-ninja — Django Ninja app for dynamic reporting."""
+"""sanjaya-django — Django Ninja app for dynamic reporting."""
 
 __version__ = "1.0.0"
 
