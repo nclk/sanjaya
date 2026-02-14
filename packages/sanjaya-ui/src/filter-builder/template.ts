@@ -1,0 +1,173 @@
+// AUTO-GENERATED - DO NOT EDIT
+// Generated from template.html by @pojagi/build-templates
+
+/**
+ * Template HTML for <filter-builder>
+ * Edit the source template.html file, not this file.
+ */
+export const template = `<style>
+  :host {
+    display: block;
+    font-family: var(--sanjaya-font-family, sans-serif);
+    font-size: var(--sanjaya-font-size-md, 0.875rem);
+    color: var(--sanjaya-color-on-surface, #212121);
+  }
+
+  .panel {
+    background: var(--sanjaya-color-surface, #ffffff);
+    border: 1px solid var(--sanjaya-color-border, #e0e0e0);
+    border-radius: var(--sanjaya-radius-md, 6px);
+    overflow: hidden;
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--sanjaya-spacing-sm, 8px) var(--sanjaya-spacing-lg, 16px);
+    background: var(--sanjaya-color-surface-variant, #f5f5f5);
+    border-bottom: 1px solid var(--sanjaya-color-border, #e0e0e0);
+    gap: var(--sanjaya-spacing-sm, 8px);
+  }
+
+  .panel-title {
+    font-weight: var(--sanjaya-font-weight-medium, 500);
+    font-size: var(--sanjaya-font-size-sm, 0.8125rem);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--sanjaya-color-on-surface-secondary, #616161);
+    flex-shrink: 0;
+  }
+
+  .panel-actions {
+    display: flex;
+    gap: var(--sanjaya-spacing-xs, 4px);
+    align-items: center;
+  }
+
+  .panel-body {
+    padding: var(--sanjaya-spacing-md, 12px) var(--sanjaya-spacing-lg, 16px);
+  }
+
+  /* ---- Buttons --------------------------------------------------------- */
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--sanjaya-spacing-xs, 4px) var(--sanjaya-spacing-sm, 8px);
+    border: 1px solid var(--sanjaya-color-border, #e0e0e0);
+    border-radius: var(--sanjaya-radius-sm, 4px);
+    font-family: inherit;
+    font-size: var(--sanjaya-font-size-sm, 0.8125rem);
+    cursor: pointer;
+    background: var(--sanjaya-color-surface, #ffffff);
+    color: var(--sanjaya-color-on-surface, #212121);
+    transition: background var(--sanjaya-transition-fast, 120ms ease-in-out),
+                border-color var(--sanjaya-transition-fast, 120ms ease-in-out);
+  }
+
+  .btn:hover {
+    background: var(--sanjaya-color-surface-variant, #f5f5f5);
+    border-color: var(--sanjaya-color-border-hover, #bdbdbd);
+  }
+
+  .btn-primary {
+    background: var(--sanjaya-color-primary, #1976d2);
+    color: var(--sanjaya-color-primary-text, #ffffff);
+    border-color: var(--sanjaya-color-primary, #1976d2);
+  }
+
+  .btn-primary:hover {
+    background: var(--sanjaya-color-primary-hover, #1565c0);
+    border-color: var(--sanjaya-color-primary-hover, #1565c0);
+  }
+
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+    pointer-events: none;
+  }
+
+  .dirty-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--sanjaya-color-warning, #ed6c02);
+    margin-left: var(--sanjaya-spacing-xs, 4px);
+    vertical-align: middle;
+  }
+
+  /* ---- Mode toggle ----------------------------------------------------- */
+
+  .mode-toggle {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--sanjaya-color-border, #e0e0e0);
+    border-radius: var(--sanjaya-radius-sm, 4px);
+    overflow: hidden;
+  }
+
+  .mode-btn {
+    padding: var(--sanjaya-spacing-xs, 4px) var(--sanjaya-spacing-sm, 8px);
+    border: none;
+    background: var(--sanjaya-color-surface, #ffffff);
+    font-family: inherit;
+    font-size: var(--sanjaya-font-size-xs, 0.6875rem);
+    cursor: pointer;
+    color: var(--sanjaya-color-on-surface-secondary, #616161);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: background var(--sanjaya-transition-fast, 120ms ease-in-out),
+                color var(--sanjaya-transition-fast, 120ms ease-in-out);
+  }
+
+  .mode-btn:not(:last-child) {
+    border-right: 1px solid var(--sanjaya-color-border, #e0e0e0);
+  }
+
+  .mode-btn[aria-pressed="true"] {
+    background: var(--sanjaya-color-primary, #1976d2);
+    color: var(--sanjaya-color-primary-text, #ffffff);
+  }
+
+  .mode-btn:hover:not([aria-pressed="true"]) {
+    background: var(--sanjaya-color-surface-variant, #f5f5f5);
+  }
+
+  /* ---- Empty state ----------------------------------------------------- */
+
+  .empty-state {
+    text-align: center;
+    padding: var(--sanjaya-spacing-xl, 24px);
+    color: var(--sanjaya-color-on-surface-secondary, #616161);
+    font-size: var(--sanjaya-font-size-sm, 0.8125rem);
+  }
+</style>
+
+<div class="panel">
+  <div class="panel-header">
+    <span class="panel-title">
+      Filters
+      <span class="dirty-dot" id="dirty-indicator" hidden></span>
+    </span>
+    <div class="panel-actions">
+      <div class="mode-toggle">
+        <button class="mode-btn" id="mode-basic" aria-pressed="true">Basic</button>
+        <button class="mode-btn" id="mode-advanced" aria-pressed="false">Advanced</button>
+      </div>
+      <button class="btn" id="btn-undo" disabled title="Discard changes">Undo</button>
+      <button class="btn btn-primary" id="btn-apply" disabled title="Apply filters">Apply</button>
+    </div>
+  </div>
+
+  <div class="panel-body">
+    <sj-filter-basic id="basic-mode"></sj-filter-basic>
+    <sj-filter-advanced id="advanced-mode" hidden></sj-filter-advanced>
+    <div class="empty-state" id="empty-state" hidden>
+      <span id="empty-message">No columns available for filtering</span>
+    </div>
+  </div>
+</div>
+`;

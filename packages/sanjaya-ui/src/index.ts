@@ -19,3 +19,24 @@ export type {
   ColumnSelection,
   ColumnsChangeDetail,
 } from "./column-selector/column-selector.js";
+
+export { SanjayaFilterBuilder } from "./filter-builder/filter-builder.js";
+export type {
+  FilterChangeDetail,
+  FilterMode,
+} from "./filter-builder/filter-builder.js";
+
+export { SanjayaFilterBasic } from "./filter-builder/basic/basic-mode.js";
+export { SanjayaFilterAdvanced } from "./filter-builder/advanced/advanced-mode.js";
+
+// Filter-builder helpers (useful for consumers building custom UIs)
+export {
+  OPERATOR_LABELS,
+  NULL_OPERATORS,
+  emptyBasicRow,
+  basicRowsToFilterGroup,
+  filterGroupToBasicRows,
+  isBasicCompatible,
+  inputTypeForColumn,
+} from "./filter-builder/helpers.js";
+export type { BasicRow } from "./filter-builder/helpers.js";

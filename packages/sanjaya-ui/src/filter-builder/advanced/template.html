@@ -1,0 +1,306 @@
+<style>
+  :host {
+    display: block;
+    font-family: var(--sanjaya-font-family, sans-serif);
+    font-size: var(--sanjaya-font-size-md, 0.875rem);
+    color: var(--sanjaya-color-on-surface, #212121);
+  }
+
+  /* ---- Condition row --------------------------------------------------- */
+
+  .condition-row {
+    display: flex;
+    align-items: center;
+    gap: var(--sanjaya-spacing-sm, 8px);
+    padding: var(--sanjaya-spacing-xs, 4px) 0;
+  }
+
+  .condition-row select,
+  .condition-row input[type="text"],
+  .condition-row input[type="number"],
+  .condition-row input[type="date"],
+  .condition-row input[type="datetime-local"] {
+    padding: var(--sanjaya-spacing-xs, 4px) var(--sanjaya-spacing-sm, 8px);
+    border: 1px solid var(--sanjaya-color-border, #e0e0e0);
+    border-radius: var(--sanjaya-radius-sm, 4px);
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+    background: var(--sanjaya-color-surface, #ffffff);
+    outline: none;
+    transition: border-color var(--sanjaya-transition-fast, 120ms ease-in-out);
+  }
+
+  .condition-row select:focus,
+  .condition-row input:focus {
+    border-color: var(--sanjaya-color-primary, #1976d2);
+    box-shadow: 0 0 0 2px var(--sanjaya-color-focus-ring, rgba(25, 118, 210, 0.3));
+  }
+
+  .condition-row select {
+    min-width: 100px;
+  }
+
+  .col-select {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .op-select {
+    min-width: 90px;
+  }
+
+  .value-input {
+    flex: 2;
+    min-width: 100px;
+  }
+
+  .value-input input,
+  .value-input select {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .value-between {
+    display: flex;
+    gap: var(--sanjaya-spacing-xs, 4px);
+    align-items: center;
+    flex: 2;
+    min-width: 100px;
+  }
+
+  .value-between input {
+    flex: 1;
+    min-width: 60px;
+  }
+
+  .value-between .between-sep {
+    color: var(--sanjaya-color-on-surface-secondary, #616161);
+    font-size: var(--sanjaya-font-size-xs, 0.6875rem);
+    flex-shrink: 0;
+  }
+
+  /* ---- Buttons --------------------------------------------------------- */
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--sanjaya-spacing-xs, 4px) var(--sanjaya-spacing-sm, 8px);
+    border: 1px solid var(--sanjaya-color-border, #e0e0e0);
+    border-radius: var(--sanjaya-radius-sm, 4px);
+    font-family: inherit;
+    font-size: var(--sanjaya-font-size-sm, 0.8125rem);
+    cursor: pointer;
+    background: var(--sanjaya-color-surface, #ffffff);
+    color: var(--sanjaya-color-on-surface, #212121);
+    transition: background var(--sanjaya-transition-fast, 120ms ease-in-out),
+                border-color var(--sanjaya-transition-fast, 120ms ease-in-out);
+  }
+
+  .btn:hover {
+    background: var(--sanjaya-color-surface-variant, #f5f5f5);
+    border-color: var(--sanjaya-color-border-hover, #bdbdbd);
+  }
+
+  .btn-sm {
+    padding: 2px var(--sanjaya-spacing-xs, 4px);
+    font-size: var(--sanjaya-font-size-xs, 0.6875rem);
+  }
+
+  .btn-icon {
+    padding: var(--sanjaya-spacing-xs, 4px);
+    border: none;
+    background: transparent;
+    color: var(--sanjaya-color-on-surface-secondary, #616161);
+    border-radius: var(--sanjaya-radius-sm, 4px);
+    line-height: 1;
+  }
+
+  .btn-icon:hover {
+    background: var(--sanjaya-color-surface-variant, #f5f5f5);
+    color: var(--sanjaya-color-on-surface, #212121);
+  }
+
+  .btn-danger {
+    color: var(--sanjaya-color-error, #d32f2f);
+  }
+
+  .btn-danger:hover {
+    background: color-mix(in srgb, var(--sanjaya-color-error, #d32f2f) 8%, transparent);
+    color: var(--sanjaya-color-error, #d32f2f);
+  }
+
+  /* ---- Filter group ---------------------------------------------------- */
+
+  .filter-group {
+    border: 1px solid var(--sanjaya-color-border, #e0e0e0);
+    border-radius: var(--sanjaya-radius-sm, 4px);
+    padding: var(--sanjaya-spacing-sm, 8px);
+    margin: var(--sanjaya-spacing-xs, 4px) 0;
+    background: var(--sanjaya-color-surface, #ffffff);
+  }
+
+  .filter-group .filter-group {
+    background: var(--sanjaya-color-surface-variant, #f5f5f5);
+    border-color: var(--sanjaya-color-border, #e0e0e0);
+  }
+
+  .filter-group .filter-group .filter-group {
+    background: var(--sanjaya-color-surface, #ffffff);
+  }
+
+  .group-header {
+    display: flex;
+    align-items: center;
+    gap: var(--sanjaya-spacing-sm, 8px);
+    margin-bottom: var(--sanjaya-spacing-sm, 8px);
+    flex-wrap: wrap;
+  }
+
+  .combinator-toggle {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--sanjaya-color-border, #e0e0e0);
+    border-radius: var(--sanjaya-radius-sm, 4px);
+    overflow: hidden;
+  }
+
+  .combinator-btn {
+    padding: 2px var(--sanjaya-spacing-sm, 8px);
+    border: none;
+    background: var(--sanjaya-color-surface, #ffffff);
+    font-family: inherit;
+    font-size: var(--sanjaya-font-size-xs, 0.6875rem);
+    cursor: pointer;
+    color: var(--sanjaya-color-on-surface-secondary, #616161);
+    font-weight: var(--sanjaya-font-weight-medium, 500);
+    text-transform: uppercase;
+    transition: background var(--sanjaya-transition-fast, 120ms ease-in-out),
+                color var(--sanjaya-transition-fast, 120ms ease-in-out);
+  }
+
+  .combinator-btn:not(:last-child) {
+    border-right: 1px solid var(--sanjaya-color-border, #e0e0e0);
+  }
+
+  .combinator-btn[aria-pressed="true"] {
+    background: var(--sanjaya-color-primary, #1976d2);
+    color: var(--sanjaya-color-primary-text, #ffffff);
+  }
+
+  .combinator-btn:hover:not([aria-pressed="true"]) {
+    background: var(--sanjaya-color-surface-variant, #f5f5f5);
+  }
+
+  .not-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sanjaya-spacing-xxs, 2px);
+    font-size: var(--sanjaya-font-size-xs, 0.6875rem);
+    color: var(--sanjaya-color-on-surface-secondary, #616161);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .not-toggle input {
+    accent-color: var(--sanjaya-color-error, #d32f2f);
+  }
+
+  /* ---- Condition NOT toggle -------------------------------------------- */
+
+  .condition-not {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-size: var(--sanjaya-font-size-xs, 0.6875rem);
+    color: var(--sanjaya-color-on-surface-secondary, #616161);
+  }
+
+  .condition-not input {
+    accent-color: var(--sanjaya-color-error, #d32f2f);
+  }
+
+  /* ---- Multi-select ---------------------------------------------------- */
+
+  .multi-select {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sanjaya-spacing-xxs, 2px);
+    padding: var(--sanjaya-spacing-xs, 4px);
+    border: 1px solid var(--sanjaya-color-border, #e0e0e0);
+    border-radius: var(--sanjaya-radius-sm, 4px);
+    background: var(--sanjaya-color-surface, #ffffff);
+    min-height: 28px;
+    flex: 2;
+    min-width: 100px;
+  }
+
+  .multi-select label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sanjaya-spacing-xxs, 2px);
+    padding: 1px var(--sanjaya-spacing-xs, 4px);
+    border-radius: var(--sanjaya-radius-sm, 4px);
+    background: var(--sanjaya-color-surface-variant, #f5f5f5);
+    font-size: var(--sanjaya-font-size-xs, 0.6875rem);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .multi-select input[type="checkbox"] {
+    width: 12px;
+    height: 12px;
+    accent-color: var(--sanjaya-color-primary, #1976d2);
+  }
+
+  /* ---- Boolean toggle -------------------------------------------------- */
+
+  .bool-toggle {
+    flex: 2;
+    min-width: 100px;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sanjaya-spacing-xs, 4px);
+    font-size: var(--sanjaya-font-size-sm, 0.8125rem);
+  }
+
+  .bool-toggle input {
+    accent-color: var(--sanjaya-color-primary, #1976d2);
+  }
+</style>
+
+<div id="root">
+  <!-- group tree rendered dynamically -->
+</div>
+
+<!-- Template: condition row (advanced — includes NOT checkbox slot) -->
+<template id="condition-row-tpl">
+  <div class="condition-row">
+    <select class="col-select" aria-label="Column"></select>
+    <select class="op-select" aria-label="Operator"></select>
+    <div class="value-input"></div>
+    <button class="btn btn-icon btn-danger remove-condition" title="Remove filter" aria-label="Remove filter">✕</button>
+  </div>
+</template>
+
+<!-- Template: filter group -->
+<template id="filter-group-tpl">
+  <div class="filter-group">
+    <div class="group-header">
+      <div class="combinator-toggle">
+        <button class="combinator-btn combinator-and" aria-pressed="true">AND</button>
+        <button class="combinator-btn combinator-or" aria-pressed="false">OR</button>
+      </div>
+      <label class="not-toggle">
+        <input type="checkbox" class="group-not-check" /> NOT
+      </label>
+      <span class="spacer"></span>
+      <button class="btn btn-sm add-condition-btn">+ Condition</button>
+      <button class="btn btn-sm add-group-btn">+ Group</button>
+      <button class="btn btn-icon btn-danger remove-group-btn" title="Remove group" aria-label="Remove group">✕</button>
+    </div>
+    <div class="group-conditions"></div>
+    <div class="group-subgroups"></div>
+  </div>
+</template>
