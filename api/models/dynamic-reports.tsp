@@ -467,6 +467,24 @@ model FlatExportRequest {
   format: ExportFormat;
 }
 
+@doc("Request body for grouped (non-pivot) export. Produces a flat aggregated table with one row per group combination. No drill-down — only the top-level summary is exported.")
+model GroupedExportRequest {
+  @doc("Row group columns")
+  rowGroupCols: ColumnVO[];
+
+  @doc("Value / measure columns with aggFunc")
+  valueCols: ColumnVO[];
+
+  @doc("AG Grid filter model")
+  filterModel?: Record<unknown>;
+
+  @doc("Sort model")
+  sortModel?: SortModelItem[];
+
+  @doc("Export format")
+  format: ExportFormat;
+}
+
 @doc("Request body for pivot export. Uses the same AG Grid SSRM shape but the server materialises the full result (ignoring startRow/endRow) and renders a cross-tab spreadsheet.")
 model PivotExportRequest {
   @doc("Row group columns (same as SSRM request)")
@@ -488,12 +506,15 @@ model PivotExportRequest {
   format: ExportFormat;
 }
 
-@doc("Unified export request — send either flat or pivot parameters")
+@doc("Unified export request — send exactly one of flat, grouped, or pivot")
 model ExportRequest {
-  @doc("Flat export parameters (mutually exclusive with pivot)")
+  @doc("Flat export parameters (table tab, no row groups)")
   flat?: FlatExportRequest;
 
-  @doc("Pivot export parameters (mutually exclusive with flat)")
+  @doc("Grouped export parameters (table tab with row groups + aggregation, no pivot)")
+  grouped?: GroupedExportRequest;
+
+  @doc("Pivot export parameters (pivot tab)")
   pivot?: PivotExportRequest;
 }
 
@@ -529,8 +550,8 @@ model SortModelItem {
   sort: "asc" | "desc";
 }
 
-@doc("AG Grid SSRM request body for the pivot / grouped-data endpoint")
-model ServerSideGetRowsRequest {
+@doc("Shared fields for AG Grid SSRM requests (table and pivot)")
+model SSRMBaseRequest {
   @doc("First row index requested (inclusive, 0-based)")
   startRow: int32;
 
@@ -546,17 +567,24 @@ model ServerSideGetRowsRequest {
   @doc("Columns used as value / measure columns (with aggFunc)")
   valueCols: ColumnVO[];
 
-  @doc("Columns the grid is pivoting on")
-  pivotCols: ColumnVO[];
-
-  @doc("Whether pivot mode is active in the grid")
-  pivotMode: boolean;
-
   @doc("Sort model")
   sortModel?: SortModelItem[];
 
   @doc("AG Grid filter model (column-keyed, shape varies by filter type)")
   filterModel?: Record<unknown>;
+}
+
+@doc("AG Grid SSRM request for the table endpoint — flat data, row grouping, and aggregation (no pivot)")
+model TableGetRowsRequest extends SSRMBaseRequest {}
+
+@doc("AG Grid SSRM request for the pivot endpoint — requires pivotMode and at least one pivot column")
+model ServerSideGetRowsRequest extends SSRMBaseRequest {
+  @doc("Columns the grid is pivoting on (at least one required)")
+  @minItems(1)
+  pivotCols: ColumnVO[];
+
+  @doc("Whether pivot mode is active in the grid (must be true)")
+  pivotMode: boolean;
 }
 
 @doc("AG Grid SSRM success response")

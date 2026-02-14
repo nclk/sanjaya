@@ -139,8 +139,16 @@ namespace Rest.Api.V1.DynamicReporting {
         | CustomErrorResponse400
         | CustomErrorResponse404
         | ValidationErrorResponse;
+      @route("/table")
+      @doc("AG Grid Server-Side Row Model endpoint for flat data, row grouping, and aggregation (no pivot). Supports filtering, sorting, pagination, and drill-down via groupKeys.")
+      @post
+      op table(@path datasetKey: string, @body body: TableGetRowsRequest):
+        | ServerSideGetRowsResponse
+        | CustomErrorResponse400
+        | CustomErrorResponse404
+        | ValidationErrorResponse;
       @route("/pivot")
-      @doc("AG Grid Server-Side Row Model endpoint — handles grouping, pivoting, filtering, sorting, and pagination")
+      @doc("AG Grid Server-Side Row Model endpoint for pivot queries. Requires pivotMode: true and at least one pivot column. Returns 400 if pivot columns are missing. Use the /table endpoint for non-pivot queries.")
       @post
       op pivot(@path datasetKey: string, @body body: ServerSideGetRowsRequest):
         | ServerSideGetRowsResponse
