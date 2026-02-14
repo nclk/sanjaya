@@ -1,0 +1,40 @@
+{
+  "name": "@pojagi/sanjaya-ui",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Reusable web-component report builder for the Sanjaya dynamic reporting platform",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./themes/light.css": "./src/themes/light.css",
+    "./themes/dark.css": "./src/themes/dark.css"
+  },
+  "files": [
+    "dist",
+    "src/themes"
+  ],
+  "scripts": {
+    "build:templates": "build-templates ./src",
+    "build:ts": "tsc",
+    "build": "pnpm run build:templates && pnpm run build:ts",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@atlaskit/pragmatic-drag-and-drop": "^1.0.0"
+  },
+  "devDependencies": {
+    "@pojagi/build-templates": "workspace:*",
+    "typescript": "^5.5.0"
+  },
+  "keywords": [
+    "web-components",
+    "report-builder",
+    "sanjaya",
+    "ag-grid",
+    "ssrm"
+  ]
+}

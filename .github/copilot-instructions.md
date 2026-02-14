@@ -106,7 +106,25 @@ DJANGO_SETTINGS_MODULE=tests.settings .venv/bin/python -m pytest packages/sanjay
 ## Building the TypeSpec
 
 ```bash
-cd api && pnpm install && pnpm build
+cd api && pnpm build
 ```
 
 Outputs OpenAPI 3.0 YAML to `api/tsp-output/@typespec/openapi3/openapi.yaml`.
+
+## Building the UI package
+
+```bash
+pnpm --filter @pojagi/sanjaya-ui run build
+```
+
+Or build all JS/TS workspace packages at once:
+
+```bash
+pnpm -r run build
+```
+
+## pnpm workspace
+
+The repo uses a **pnpm workspace** (`pnpm-workspace.yaml`) for all JS/TS
+packages. Use `workspace:*` for inter-package dependencies and always run
+`pnpm install` from the repo root — never `npm install` inside a package.
