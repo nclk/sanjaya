@@ -13,6 +13,8 @@ packages/
   sanjaya-core/       # Shared types, enums, DataProvider ABC, MockDataProvider
   sanjaya-django/     # Django Ninja app (API, models, services, schemas)
   sanjaya-sqlalchemy/ # SQLAlchemy Core DataProvider implementation
+  sanjaya-ui/         # Web-component report builder (Custom Elements + Shadow DOM)
+  build-templates/    # @pojagi/build-templates — HTML → TS string build tool
 api/                  # TypeSpec definitions → OpenAPI 3.0
 ```
 
@@ -89,6 +91,9 @@ parameterised paths (`/{report_id}`) to avoid route shadowing.
 - No wildcard imports.
 - Tests are plain pytest — use fixtures, not setUp/tearDown.
 - Django tests need `DJANGO_SETTINGS_MODULE=tests.settings`.
+- **npm scope:** All published JS/TS packages use the `@pojagi` scope
+  (e.g. `@pojagi/build-templates`, `@pojagi/sanjaya-ui`). Never use
+  `@sanjaya` — we do not own that scope.
 
 ## Running tests
 
