@@ -570,7 +570,10 @@ model SSRMBaseRequest {
   @doc("Sort model")
   sortModel?: SortModelItem[];
 
-  @doc("AG Grid filter model (column-keyed, shape varies by filter type)")
+  @doc("Rich filter tree built by custom filter widgets (sanjaya FilterGroup format). Takes precedence over filterModel when both are provided.")
+  filter?: FilterGroup;
+
+  @doc("AG Grid column-keyed filter model (legacy / fallback). Ignored when 'filter' is provided.")
   filterModel?: Record<unknown>;
 }
 

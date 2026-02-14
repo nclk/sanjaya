@@ -16,7 +16,7 @@ from sanjaya_django.schemas.pivot import (
     ServerSideGetRowsRequest,
     ServerSideGetRowsResponse,
 )
-from sanjaya_django.services.pivot import handle_ssrm_request
+from sanjaya_django.services.ssrm import handle_ssrm_request
 
 router = Router(tags=["pivot"], by_alias=True)
 

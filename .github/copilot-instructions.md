@@ -45,7 +45,7 @@ api/                  # TypeSpec definitions → OpenAPI 3.0
   calls `ProviderRegistry().add(...)`.  Configured via `SANJAYA_PROVIDERS`
   in Django settings.
 - **AG Grid SSRM** — the pivot endpoint speaks the AG Grid Server-Side Row
-  Model wire format. Pivot translation lives in `sanjaya_django.services.pivot`.
+  Model wire format. Pivot translation lives in `sanjaya_django.services.ssrm`.
 - **Server-driven export** — CSV (streaming) and XLSX via `openpyxl`.
 
 ## Key patterns
@@ -93,9 +93,9 @@ parameterised paths (`/{report_id}`) to avoid route shadowing.
 ## Running tests
 
 ```bash
-pytest packages/sanjaya-core/
-pytest packages/sanjaya-sqlalchemy/
-DJANGO_SETTINGS_MODULE=tests.settings pytest packages/sanjaya-django/
+.venv/bin/python -m pytest packages/sanjaya-core/
+.venv/bin/python -m pytest packages/sanjaya-sqlalchemy/
+DJANGO_SETTINGS_MODULE=tests.settings .venv/bin/python -m pytest packages/sanjaya-django/
 ```
 
 ## Building the TypeSpec

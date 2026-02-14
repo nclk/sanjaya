@@ -99,6 +99,20 @@ clear separation matching the UI's "Table" and "Pivot" tabs.
      `provider.aggregate(group_by_cols=[])` with no limit, then renders
      the flat result as CSV/XLSX (no cross-tab reshaping needed).
 
+6. Add explicit `filter` field to `SSRMBaseRequest` (TypeSpec + Python
+   schema + service layer):
+   - `filter` accepts the rich sanjaya `FilterGroup` JSON from custom
+     filter-builder widgets. Takes precedence over `filterModel`.
+   - `filterModel` is retained as a legacy/fallback for AG Grid's
+     column-keyed format.
+   - `_build_filter_group()` checks `filter` first, falls back to
+     `filterModel`.
+
+7. Document UI integration decisions in `docs/ui-integration-notes.md`:
+   - Custom widgets + SSRM datasource pattern.
+   - `filter` vs `filterModel` wire format.
+   - Column selection, export variants, refresh triggers.
+
 ---
 
 ## Phase 4 — Table endpoint & strict pivot validation

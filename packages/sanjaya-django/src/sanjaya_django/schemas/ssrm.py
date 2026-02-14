@@ -40,6 +40,7 @@ class SSRMBaseRequest(CamelSchema):
     group_keys: list[str]
     value_cols: list[ColumnVO]
     sort_model: list[SortModelItem] | None = None
+    filter: dict[str, Any] | None = None
     filter_model: dict[str, Any] | None = None
 
 
