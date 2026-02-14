@@ -17,10 +17,10 @@ npm install @pojagi/sanjaya-ui
   import '@pojagi/sanjaya-ui/themes/light.css';
 </script>
 
-<sanjaya-report-builder></sanjaya-report-builder>
+<sj-report-builder></sj-report-builder>
 
 <script type="module">
-  const builder = document.querySelector('sanjaya-report-builder');
+  const builder = document.querySelector('sj-report-builder');
 
   // Inject your data client (you implement the SanjayaDataClient interface)
   builder.client = myClient;

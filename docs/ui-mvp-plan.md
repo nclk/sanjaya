@@ -6,7 +6,7 @@
 ## Architecture Overview
 
 A suite of custom elements composable into a single
-`<sanjaya-report-builder>` shell. The host application injects a
+`<sj-report-builder>` shell. The host application injects a
 **data-access client** conforming to a published TypeScript interface; the
 components never assume endpoint URLs, authentication strategy, or HTTP
 library.
@@ -16,7 +16,7 @@ library.
 │  Host Application (React + MUI, Angular, vanilla, …)               │
 │                                                                      │
 │  ┌────────────────────────────────────────────────────────────────┐  │
-│  │  <sanjaya-report-builder>                                      │  │
+│  │  <sj-report-builder>                                      │  │
 │  │  ┌──────────────┐ ┌──────────────────┐ ┌───────────────────┐  │  │
 │  │  │ Dataset      │ │ Column           │ │ Filter            │  │  │
 │  │  │ Picker       │ │ Selector         │ │ Builder           │  │  │
@@ -74,22 +74,22 @@ packages/sanjaya-ui/
 │   │   └── events.ts               # typed CustomEvent helpers
 │   ├── dataset-picker/
 │   │   ├── dataset-picker.html      # template source
-│   │   └── dataset-picker.ts        # <sanjaya-dataset-picker> element
+│   │   └── dataset-picker.ts        # <sj-dataset-picker> element
 │   ├── column-selector/
 │   │   ├── column-selector.html
-│   │   └── column-selector.ts       # <sanjaya-column-selector> element
+│   │   └── column-selector.ts       # <sj-column-selector> element
 │   ├── filter-builder/
 │   │   ├── filter-builder.html
 │   │   ├── filter-condition.html
 │   │   ├── filter-group.html
-│   │   └── filter-builder.ts        # <sanjaya-filter-builder> element
+│   │   └── filter-builder.ts        # <sj-filter-builder> element
 │   ├── pivot-config/
 │   │   ├── pivot-config.html
 │   │   ├── pivot-panel.html
-│   │   └── pivot-config.ts          # <sanjaya-pivot-config> element
+│   │   └── pivot-config.ts          # <sj-pivot-config> element
 │   └── report-builder/
 │       ├── report-builder.html
-│       └── report-builder.ts        # <sanjaya-report-builder> orchestrator
+│       └── report-builder.ts        # <sj-report-builder> orchestrator
 └── test/
     ├── dataset-picker.test.ts
     ├── column-selector.test.ts
@@ -105,7 +105,7 @@ packages/sanjaya-ui/
 ### 1.1 `SanjayaDataClient` interface
 
 The host implements this and passes it as a property on
-`<sanjaya-report-builder>`. Methods map to the Sanjaya REST surface:
+`<sj-report-builder>`. Methods map to the Sanjaya REST surface:
 
 ```ts
 interface SanjayaDataClient {
@@ -224,7 +224,7 @@ protected emit<T>(name: string, detail: T): void {
 
 ---
 
-## Phase 2 — `<sanjaya-dataset-picker>`
+## Phase 2 — `<sj-dataset-picker>`
 
 ### Behavior
 
@@ -251,7 +251,7 @@ protected emit<T>(name: string, detail: T): void {
 
 ### 2.1 Deliverables
 
-- [ ] Element registered as `sanjaya-dataset-picker`
+- [ ] Element registered as `sj-dataset-picker`
 - [ ] Searchable dropdown with keyboard navigation
 - [ ] Apply / Undo controls
 - [ ] Event + callback dispatch
@@ -259,7 +259,7 @@ protected emit<T>(name: string, detail: T): void {
 
 ---
 
-## Phase 3 — `<sanjaya-column-selector>`
+## Phase 3 — `<sj-column-selector>`
 
 ### Behavior
 
@@ -302,7 +302,7 @@ toggles vs. last-applied state.
 
 ### 3.1 Deliverables
 
-- [ ] Element registered as `sanjaya-column-selector`
+- [ ] Element registered as `sj-column-selector`
 - [ ] Drag-and-drop reordering (desktop + mobile)
 - [ ] isGroup toggle with measure-column guard
 - [ ] Select all / deselect all
@@ -311,7 +311,7 @@ toggles vs. last-applied state.
 
 ---
 
-## Phase 4 — `<sanjaya-filter-builder>`
+## Phase 4 — `<sj-filter-builder>`
 
 ### Two modes
 
@@ -376,7 +376,7 @@ produces:
 
 ### 4.1 Deliverables
 
-- [ ] Element registered as `sanjaya-filter-builder`
+- [ ] Element registered as `sj-filter-builder`
 - [ ] Basic mode: flat AND list with ALL default
 - [ ] Advanced mode: recursive groups with AND/OR/NOT
 - [ ] Operator-driven value input adaptation
@@ -388,7 +388,7 @@ produces:
 
 ---
 
-## Phase 5 — `<sanjaya-pivot-config>`
+## Phase 5 — `<sj-pivot-config>`
 
 ### Behavior
 
@@ -436,7 +436,7 @@ interface PivotConfig {
 
 ### 5.1 Deliverables
 
-- [ ] Element registered as `sanjaya-pivot-config`
+- [ ] Element registered as `sj-pivot-config`
 - [ ] Three sub-panels with drag-and-drop
 - [ ] AggFunc picker constrained by `allowedAggs`
 - [ ] Dimension exclusivity (Rows ↔ Columns, not both)
@@ -446,7 +446,7 @@ interface PivotConfig {
 
 ---
 
-## Phase 6 — `<sanjaya-report-builder>` orchestrator
+## Phase 6 — `<sj-report-builder>` orchestrator
 
 ### Responsibilities
 
@@ -523,7 +523,7 @@ Flow:
 
 ### 6.1 Deliverables
 
-- [ ] Element registered as `sanjaya-report-builder`
+- [ ] Element registered as `sj-report-builder`
 - [ ] All child components composed and wired
 - [ ] Two-tier dirty state (panel + report level)
 - [ ] Actions menu with enable/disable logic
@@ -569,11 +569,11 @@ Thin React component that:
 | Phase | Component | Key outcome |
 |-------|-----------|-------------|
 | **1** | Types + client + themes + utilities | Foundation: TS types, `SanjayaDataClient` interface, CSS theming, `DirtyTracker` |
-| **2** | `<sanjaya-dataset-picker>` | Dataset selection with searchable dropdown |
-| **3** | `<sanjaya-column-selector>` | Reorderable column list with isGroup toggle |
-| **4** | `<sanjaya-filter-builder>` | Basic (flat AND) + Advanced (recursive groups) filter editing |
-| **5** | `<sanjaya-pivot-config>` | Row / Column / Value zone builders with agg picker |
-| **6** | `<sanjaya-report-builder>` | Orchestrator with two-tier dirty state + Actions menu |
+| **2** | `<sj-dataset-picker>` | Dataset selection with searchable dropdown |
+| **3** | `<sj-column-selector>` | Reorderable column list with isGroup toggle |
+| **4** | `<sj-filter-builder>` | Basic (flat AND) + Advanced (recursive groups) filter editing |
+| **5** | `<sj-pivot-config>` | Row / Column / Value zone builders with agg picker |
+| **6** | `<sj-report-builder>` | Orchestrator with two-tier dirty state + Actions menu |
 | **7** | Integration + docs | React wrapper, theming guide, demo |
 
 Each phase is independently testable. Phases 2–5 can be developed in

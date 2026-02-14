@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------------
-// Tests for <sanjaya-dataset-picker>
+// Tests for <sj-dataset-picker>
 // ---------------------------------------------------------------------------
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
@@ -65,7 +65,7 @@ async function createElement(
   client?: SanjayaDataClient,
 ): Promise<SanjayaDatasetPicker> {
   const el = document.createElement(
-    "sanjaya-dataset-picker",
+    "sj-dataset-picker",
   ) as SanjayaDatasetPicker;
   if (client) {
     el.client = client;
@@ -106,7 +106,7 @@ function getEmptyState(el: SanjayaDatasetPicker): HTMLElement {
 // Tests
 // ---------------------------------------------------------------------------
 
-describe("sanjaya-dataset-picker", () => {
+describe("sj-dataset-picker", () => {
   afterEach(() => {
     document.body.innerHTML = "";
   });

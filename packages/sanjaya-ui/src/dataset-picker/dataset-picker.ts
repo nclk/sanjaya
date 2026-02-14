@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------------
-// <sanjaya-dataset-picker> — searchable single-select dataset dropdown
+// <sj-dataset-picker> — searchable single-select dataset dropdown
 // ---------------------------------------------------------------------------
 
 import type { SanjayaDataClient } from "../types/client.js";
@@ -19,16 +19,16 @@ export interface DatasetChangeDetail {
 }
 
 /**
- * `<sanjaya-dataset-picker>` — a searchable single-select panel that
+ * `<sj-dataset-picker>` — a searchable single-select panel that
  * lists registered datasets and lets the user pick one.
  *
  * @fires dataset-change — Emitted when the user applies a selection.
  *
  * @example
  * ```html
- * <sanjaya-dataset-picker></sanjaya-dataset-picker>
+ * <sj-dataset-picker></sj-dataset-picker>
  * <script>
- *   const el = document.querySelector('sanjaya-dataset-picker');
+ *   const el = document.querySelector('sj-dataset-picker');
  *   el.client = mySanjayaClient;
  *   el.addEventListener('dataset-change', (e) => {
  *     console.log(e.detail.key);
@@ -298,4 +298,4 @@ export class SanjayaDatasetPicker extends HTMLElement {
 }
 
 // Register the custom element
-customElements.define("sanjaya-dataset-picker", SanjayaDatasetPicker);
+customElements.define("sj-dataset-picker", SanjayaDatasetPicker);

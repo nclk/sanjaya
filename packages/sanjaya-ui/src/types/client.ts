@@ -23,7 +23,7 @@ import type {
 } from "./reports.js";
 
 /**
- * Data-access interface injected into `<sanjaya-report-builder>` by the
+ * Data-access interface injected into `<sj-report-builder>` by the
  * host application.
  *
  * The report builder components **never** make HTTP calls directly. Instead
@@ -49,7 +49,7 @@ import type {
  *   // … implement remaining methods
  * };
  *
- * const builder = document.querySelector('sanjaya-report-builder')!;
+ * const builder = document.querySelector('sj-report-builder')!;
  * builder.client = client;
  * ```
  */
