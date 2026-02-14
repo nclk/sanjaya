@@ -32,10 +32,12 @@ def handle_export(
     """Produce a streaming CSV or XLSX response."""
     if request.flat is not None:
         return _flat_export(provider, request, ctx=ctx)
+    elif request.grouped is not None:
+        return _grouped_export(provider, request, ctx=ctx)
     elif request.pivot is not None:
         return _pivot_export(provider, request, ctx=ctx)
     else:
-        raise ValueError("Export request must specify either 'flat' or 'pivot'.")
+        raise ValueError("Export request must specify one of 'flat', 'grouped', or 'pivot'.")
 
 
 # ---------------------------------------------------------------------------
@@ -65,6 +67,70 @@ def _flat_export(
         return _render_csv(result.columns, result.rows, filename="export.csv")
     else:
         return _render_xlsx(result.columns, result.rows, filename="export.xlsx")
+
+
+# ---------------------------------------------------------------------------
+# Grouped export (row groups + aggregation, no pivot)
+# ---------------------------------------------------------------------------
+
+
+def _grouped_export(
+    provider: DataProvider,
+    request: ExportRequest,
+    *,
+    ctx: RequestContext | None = None,
+) -> StreamingHttpResponse:
+    grouped = request.grouped
+    assert grouped is not None
+
+    filter_group = parse_ag_grid_filter_model(grouped.filter_model)
+    group_by_rows = [c.field or c.id for c in grouped.row_group_cols]
+    values = [
+        ValueSpec(
+            column=c.field or c.id,
+            agg=c.agg_func or AggFunc.SUM,
+            label=c.display_name,
+        )
+        for c in grouped.value_cols
+    ]
+
+    sort: list[SortSpec] | None = None
+    if grouped.sort_model:
+        sort = [
+            SortSpec(
+                column=s.col_id,
+                direction=SortDirection.DESC if s.sort == "desc" else SortDirection.ASC,
+            )
+            for s in grouped.sort_model
+        ]
+
+    agg_result: AggregateResult = provider.aggregate(
+        group_by_rows=group_by_rows,
+        group_by_cols=[],  # no pivot
+        values=values,
+        filter_group=filter_group,
+        sort=sort,
+        limit=None,  # full result for export
+        offset=0,
+        ctx=ctx,
+    )
+
+    # Build headers from the aggregate column metadata.
+    headers: list[str] = []
+    col_keys: list[str] = []
+    for col in agg_result.columns:
+        headers.append(col.header)
+        col_keys.append(col.key)
+
+    rows_for_export = [
+        {h: row.get(k) for h, k in zip(headers, col_keys)}
+        for row in agg_result.rows
+    ]
+
+    if grouped.format == ExportFormat.CSV:
+        return _render_csv(headers, rows_for_export, filename="grouped_export.csv")
+    else:
+        return _render_xlsx(headers, rows_for_export, filename="grouped_export.xlsx")
 
 
 # ---------------------------------------------------------------------------

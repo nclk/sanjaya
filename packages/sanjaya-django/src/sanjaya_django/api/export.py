@@ -31,12 +31,12 @@ def export(request, dataset_key: str, body: ExportRequest):
     except DatasetNotFoundError:
         return 404, make_not_found("Dataset", dataset_key)
 
-    if body.flat is None and body.pivot is None:
+    if body.flat is None and body.grouped is None and body.pivot is None:
         return 400, CustomErrorResponse(
             details=[
                 ErrorDetail(
                     error_type="validation_error",
-                    message="Must specify either 'flat' or 'pivot' export parameters.",
+                    message="Must specify one of 'flat', 'grouped', or 'pivot' export parameters.",
                 )
             ]
         )
