@@ -70,3 +70,29 @@ export {
   updateAggFunc,
 } from "./pivot-config/helpers.js";
 export type { PivotConfig, PivotZone } from "./pivot-config/helpers.js";
+
+// Report builder orchestrator
+export { SanjayaReportBuilder } from "./report-builder/report-builder.js";
+export type {
+  ReportDefinitionChangeDetail,
+  ReportActionDetail,
+} from "./report-builder/report-builder.js";
+
+export { SanjayaActionsMenu } from "./report-builder/actions-menu/actions-menu.js";
+export type { ActionSelectDetail } from "./report-builder/actions-menu/actions-menu.js";
+
+// Report-builder helpers
+export {
+  emptyBuilderState,
+  stateToDefinition,
+  definitionToState,
+  buildActionMenu,
+  hasNonDefaultState,
+  isReportDirty,
+} from "./report-builder/helpers.js";
+export type {
+  ReportBuilderState,
+  ClientAction,
+  MenuAction,
+  MenuActionItem,
+} from "./report-builder/helpers.js";
