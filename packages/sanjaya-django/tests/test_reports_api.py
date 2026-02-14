@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 from django.contrib.auth import get_user_model
 
-from sanjaya_django.models import DynamicReport
+from sanjaya_django.models import DynamicReport, DynamicReportFavorite
 
 User = get_user_model()
 
@@ -193,3 +193,153 @@ class TestReportsSharing:
         )
         resp = client.get(f"/reports/{report.pk}", user=other_user)
         assert resp.status_code == 200
+
+
+@pytest.mark.django_db
+class TestPivotDefinitionPersistence:
+    """§1 — pivot config round-trips through save/load."""
+
+    def test_save_and_load_pivot_config(self, client, user):
+        """Create a report with full pivot definition, reload, verify intact."""
+        definition = {
+            "datasetKey": "test_trades",
+            "selectedColumns": ["year", "region", "amount"],
+            "filter": {"combinator": "and", "conditions": []},
+            "rowGroupCols": [
+                {"id": "region", "displayName": "Region", "field": "region"},
+            ],
+            "pivotCols": [
+                {"id": "year", "displayName": "Year", "field": "year"},
+            ],
+            "valueCols": [
+                {
+                    "id": "amount",
+                    "displayName": "Amount",
+                    "field": "amount",
+                    "aggFunc": "sum",
+                },
+            ],
+            "sortModel": [{"colId": "region", "sort": "asc"}],
+        }
+        metadata = {"datasetKey": "test_trades", "definition": definition}
+
+        # Create
+        resp = client.post(
+            "/reports/",
+            json={"title": "Pivot Report", "metadata": metadata},
+            user=user,
+        )
+        assert resp.status_code == 201
+        report_id = resp.json()["id"]
+
+        # Reload
+        resp = client.get(f"/reports/{report_id}", user=user)
+        assert resp.status_code == 200
+        data = resp.json()
+        loaded_def = data["metadata"]["definition"]
+
+        assert loaded_def["datasetKey"] == "test_trades"
+        assert loaded_def["rowGroupCols"] == definition["rowGroupCols"]
+        assert loaded_def["pivotCols"] == definition["pivotCols"]
+        assert loaded_def["valueCols"] == definition["valueCols"]
+        assert loaded_def["sortModel"] == definition["sortModel"]
+
+    def test_flat_report_still_works(self, client, user):
+        """A report with no pivot fields should still round-trip fine."""
+        definition = {
+            "datasetKey": "test_trades",
+            "selectedColumns": ["year", "region"],
+            "filter": {"combinator": "and", "conditions": []},
+        }
+        metadata = {"datasetKey": "test_trades", "definition": definition}
+
+        resp = client.post(
+            "/reports/",
+            json={"title": "Flat Report", "metadata": metadata},
+            user=user,
+        )
+        assert resp.status_code == 201
+        report_id = resp.json()["id"]
+
+        resp = client.get(f"/reports/{report_id}", user=user)
+        assert resp.status_code == 200
+        loaded_def = resp.json()["metadata"]["definition"]
+        assert loaded_def["datasetKey"] == "test_trades"
+        assert "rowGroupCols" not in loaded_def
+        assert "pivotCols" not in loaded_def
+
+
+@pytest.mark.django_db
+class TestFavoriteAction:
+    """§2 — favorite toggle, response field, and list filtering."""
+
+    def test_favorite_toggle(self, client, user, report):
+        """Favoriting then re-favoriting should toggle."""
+        # Favorite
+        resp = client.post(
+            f"/reports/{report.pk}/actions",
+            json={"action": "favorite"},
+            user=user,
+        )
+        assert resp.status_code == 200
+        assert resp.json()["message"] == "Report favorited."
+        assert resp.json()["report"]["isFavorited"] is True
+
+        # Unfavorite (toggle)
+        resp = client.post(
+            f"/reports/{report.pk}/actions",
+            json={"action": "favorite"},
+            user=user,
+        )
+        assert resp.status_code == 200
+        assert resp.json()["message"] == "Report unfavorited."
+        assert resp.json()["report"]["isFavorited"] is False
+
+    def test_favorite_in_available_actions(self, client, user, report):
+        """favorite should always appear in availableActions for a viewer+."""
+        resp = client.get(f"/reports/{report.pk}/actions", user=user)
+        assert resp.status_code == 200
+        assert "favorite" in resp.json()["actions"]
+
+    def test_is_favorited_field_on_get(self, client, user, report):
+        """isFavorited should reflect the current state."""
+        resp = client.get(f"/reports/{report.pk}", user=user)
+        assert resp.json()["isFavorited"] is False
+
+        # Favorite it
+        DynamicReportFavorite.objects.create(report=report, user=user)
+
+        resp = client.get(f"/reports/{report.pk}", user=user)
+        assert resp.json()["isFavorited"] is True
+
+    def test_list_favorited_filter(self, client, user):
+        """?favorited=true should return only favorited reports."""
+        r1 = DynamicReport.objects.create(title="Fav1", created_by=user)
+        r2 = DynamicReport.objects.create(title="Fav2", created_by=user)
+        DynamicReport.objects.create(title="NotFav", created_by=user)
+
+        DynamicReportFavorite.objects.create(report=r1, user=user)
+        DynamicReportFavorite.objects.create(report=r2, user=user)
+
+        resp = client.get("/reports/?favorited=true", user=user)
+        assert resp.status_code == 200
+        titles = {r["title"] for r in resp.json()["reports"]}
+        assert titles == {"Fav1", "Fav2"}
+
+    def test_favorite_per_user_isolation(self, client, user, other_user, report):
+        """One user's favorite should not affect another user's view."""
+        from sanjaya_django.models import DynamicReportUserShare
+
+        # Give other_user access
+        DynamicReportUserShare.objects.create(
+            report=report, user=other_user, permission="viewer"
+        )
+
+        # user favorites; other_user does not
+        DynamicReportFavorite.objects.create(report=report, user=user)
+
+        resp = client.get(f"/reports/{report.pk}", user=user)
+        assert resp.json()["isFavorited"] is True
+
+        resp = client.get(f"/reports/{report.pk}", user=other_user)
+        assert resp.json()["isFavorited"] is False

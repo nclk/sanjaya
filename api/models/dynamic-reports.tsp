@@ -83,6 +83,18 @@ model DynamicReportDefinition {
 
   @doc("Filter group authored by the report builder")
   filter: FilterGroup;
+
+  @doc("Row-group columns (used in both table grouped mode and pivot)")
+  rowGroupCols?: ColumnVO[];
+
+  @doc("Pivot cross-tab columns (pivot mode only)")
+  pivotCols?: ColumnVO[];
+
+  @doc("Value/measure columns with aggregate functions")
+  valueCols?: ColumnVO[];
+
+  @doc("Sort model to restore column sort state")
+  sortModel?: SortModelItem[];
 }
 
 @doc("well-known metadata keys for a saved dynamic report")
@@ -152,6 +164,9 @@ model DynamicReport {
 
   @doc("Arbitrary backend-defined metadata")
   metadata?: DynamicReportMetadata;
+
+  @doc("Whether the requesting user has favorited this report")
+  isFavorited: boolean;
 }
 
 @doc("Summary shape used for list responses")
@@ -164,6 +179,9 @@ model DynamicReportSummary {
   version: int32;
   availableActions: DynamicReportAction[];
   metadata?: DynamicReportMetadata;
+
+  @doc("Whether the requesting user has favorited this report")
+  isFavorited: boolean;
 }
 
 @doc("Filter options for listing saved reports")
@@ -172,6 +190,9 @@ model DynamicReportFilter {
   createdBy?: string;
   tags?: string[];
   search?: string;
+
+  @doc("Filter to only favorited reports")
+  favorited?: boolean;
 
   @doc("Metadata filters are backend-defined")
   metadata?: Record<string[]>;

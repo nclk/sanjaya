@@ -10,6 +10,7 @@ from django.db.models import Q
 
 from sanjaya_django.models import (
     DynamicReport,
+    DynamicReportFavorite,
     DynamicReportGroupShare,
     DynamicReportUserShare,
     Permission,
@@ -123,6 +124,9 @@ def compute_available_actions(
     if perm == Permission.OWNER or _has_perm(user, "can_destroy_any"):
         actions.append("delete")
 
+    # Any authenticated user with at least viewer access can favorite
+    actions.append("favorite")
+
     return actions
 
 
@@ -184,6 +188,17 @@ def perform_action(
         case "delete":
             report.delete()
             return report, "Report deleted."
+
+        case "favorite":
+            _, created = DynamicReportFavorite.objects.get_or_create(
+                report=report, user=user,
+            )
+            if not created:
+                DynamicReportFavorite.objects.filter(
+                    report=report, user=user,
+                ).delete()
+                return report, "Report unfavorited."
+            return report, "Report favorited."
 
         case _:
             raise ValueError(f"Unknown action: {action!r}")

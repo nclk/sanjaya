@@ -40,6 +40,7 @@ class DynamicReportOut(CamelSchema):
     tags: list[str]
     available_actions: list[str]
     metadata: dict | None = None
+    is_favorited: bool = False
 
 
 class DynamicReportSummaryOut(CamelSchema):
@@ -51,6 +52,7 @@ class DynamicReportSummaryOut(CamelSchema):
     version: int
     available_actions: list[str]
     metadata: dict | None = None
+    is_favorited: bool = False
 
 
 class ListDynamicReportsResponse(CamelSchema):

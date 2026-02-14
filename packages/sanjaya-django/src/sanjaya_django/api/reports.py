@@ -9,6 +9,7 @@ from ninja import Router
 
 from sanjaya_django.models import (
     DynamicReport,
+    DynamicReportFavorite,
     DynamicReportGroupShare,
     DynamicReportUserShare,
     Permission,
@@ -74,6 +75,9 @@ def _report_out(report: DynamicReport, user) -> DynamicReportOut:
         tags=report.tags or [],
         available_actions=compute_available_actions(report, user),
         metadata=report.metadata,
+        is_favorited=DynamicReportFavorite.objects.filter(
+            report=report, user=user,
+        ).exists(),
     )
 
 
@@ -87,6 +91,9 @@ def _summary_out(report: DynamicReport, user) -> DynamicReportSummaryOut:
         version=report.version,
         available_actions=compute_available_actions(report, user),
         metadata=report.metadata,
+        is_favorited=DynamicReportFavorite.objects.filter(
+            report=report, user=user,
+        ).exists(),
     )
 
 
@@ -112,6 +119,7 @@ def list_reports(
     request,
     status: str | None = None,
     search: str | None = None,
+    favorited: bool | None = None,
     limit: int = 25,
     offset: int = 0,
     sort_by: str = "updatedAt",
@@ -135,6 +143,8 @@ def list_reports(
         qs = qs.filter(status=status)
     if search:
         qs = qs.filter(title__icontains=search)
+    if favorited:
+        qs = qs.filter(favorites__user=user)
 
     sort_field_map = {
         "title": "title",
