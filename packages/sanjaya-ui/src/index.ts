@@ -12,3 +12,10 @@ export { emit, callbackName } from "./shared/events.js";
 // Components (side-effect: registers custom elements)
 export { SanjayaDatasetPicker } from "./dataset-picker/dataset-picker.js";
 export type { DatasetChangeDetail } from "./dataset-picker/dataset-picker.js";
+
+export { SanjayaColumnSelector } from "./column-selector/column-selector.js";
+export type {
+  ColumnEntry,
+  ColumnSelection,
+  ColumnsChangeDetail,
+} from "./column-selector/column-selector.js";
