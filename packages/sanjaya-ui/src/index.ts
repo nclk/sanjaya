@@ -96,3 +96,26 @@ export type {
   MenuAction,
   MenuActionItem,
 } from "./report-builder/helpers.js";
+
+// Data grid (AG Grid SSRM viewer)
+export { SanjayaDataGrid } from "./data-grid/data-grid.js";
+export type {
+  DataGridTab,
+  TabChangeDetail,
+  GridReadyDetail,
+} from "./data-grid/data-grid.js";
+
+// Data-grid helpers (useful for consumers building custom grid setups)
+export {
+  columnMetaToColDef,
+  tableColDefs,
+  pivotSecondaryColDefs,
+  buildTableRequest,
+  buildPivotRequest,
+  hasFilter,
+  isPivotReady,
+} from "./data-grid/helpers.js";
+export type {
+  GridColDef,
+  SSRMGetRowsParams,
+} from "./data-grid/helpers.js";

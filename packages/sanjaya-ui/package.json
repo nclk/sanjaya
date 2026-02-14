@@ -28,6 +28,14 @@
   "dependencies": {
     "@atlaskit/pragmatic-drag-and-drop": "^1.0.0"
   },
+  "peerDependencies": {
+    "ag-grid-enterprise": "^32.0.0"
+  },
+  "peerDependenciesMeta": {
+    "ag-grid-enterprise": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@pojagi/build-templates": "workspace:*",
     "happy-dom": "^20.6.1",
