@@ -534,33 +534,17 @@ Flow:
 
 ---
 
-## Phase 7 — Integration, documentation, and polish
+## Phase 7 — Integration, demo apps, and documentation
 
-### 7.1 React wrapper (optional, published separately or as sub-entry)
+Phase 7 is broken into four sub-phases in a dedicated document:
+**[UI MVP Integration Plan](ui-mvp-integration-plan.md)**.
 
-Target host environment: **React ^18.3.1**, **ag-grid-enterprise ^32.0.0**,
-**ag-grid-react ^32.0.0**.
-
-Thin React component that:
-- Creates the custom element
-- Forwards props → element properties
-- Maps `on*` React props → element callbacks
-- Applies MUI theme → `--sanjaya-*` CSS vars
-
-### 7.2 Documentation
-
-- README with installation, quick-start, and API reference.
-- Theming guide (CSS variable catalog, MUI integration recipe).
-- `SanjayaDataClient` implementation guide (including openapi-fetch recipe).
-- Storybook-style live examples (or a lightweight demo page).
-
-### 7.3 Deliverables
-
-- [ ] React wrapper (if team confirms demand)
-- [ ] README + theming guide
-- [ ] Client implementation guide
-- [ ] Demo page
-- [ ] All component tests green
+| Sub-phase | Deliverable |
+|-----------|-------------|
+| **7a** | Django host project + Northwind MSSQL dataset (real backend) |
+| **7b** | `<sj-data-grid>` component (AG Grid SSRM in Table + Pivot tabs) |
+| **7c** | Vanilla TypeScript reference app |
+| **7d** | React + MUI 7.2.0 integration app |
 
 ---
 
@@ -574,7 +558,7 @@ Thin React component that:
 | **4** | `<sj-filter-builder>` | Basic (flat AND) + Advanced (recursive groups) filter editing |
 | **5** | `<sj-pivot-config>` | Row / Column / Value zone builders with agg picker |
 | **6** | `<sj-report-builder>` | Orchestrator with two-tier dirty state + Actions menu |
-| **7** | Integration + docs | React wrapper, theming guide, demo |
+| **7** | [Integration + demos](ui-mvp-integration-plan.md) | Django host, `<sj-data-grid>`, vanilla TS app, React + MUI app |
 
 Each phase is independently testable. Phases 2–5 can be developed in
 parallel once Phase 1 is complete.
