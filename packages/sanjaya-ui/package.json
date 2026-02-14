@@ -21,6 +21,8 @@
     "build:templates": "build-templates ./src",
     "build:ts": "tsc",
     "build": "pnpm run build:templates && pnpm run build:ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "clean": "rm -rf dist"
   },
   "dependencies": {
@@ -28,7 +30,9 @@
   },
   "devDependencies": {
     "@pojagi/build-templates": "workspace:*",
-    "typescript": "^5.5.0"
+    "happy-dom": "^20.6.1",
+    "typescript": "^5.5.0",
+    "vitest": "^4.0.18"
   },
   "keywords": [
     "web-components",

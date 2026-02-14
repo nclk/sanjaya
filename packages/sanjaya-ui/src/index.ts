@@ -8,3 +8,7 @@ export * from "./types/index.js";
 // Shared utilities
 export { DirtyTracker } from "./shared/state.js";
 export { emit, callbackName } from "./shared/events.js";
+
+// Components (side-effect: registers custom elements)
+export { SanjayaDatasetPicker } from "./dataset-picker/dataset-picker.js";
+export type { DatasetChangeDetail } from "./dataset-picker/dataset-picker.js";
