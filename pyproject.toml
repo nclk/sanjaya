@@ -14,10 +14,13 @@ members = [
     "packages/sanjaya-core",
     "packages/sanjaya-django",
     "packages/sanjaya-sqlalchemy",
+    "apps/demo-server",
 ]
 
 [tool.uv.sources]
 sanjaya-core = { workspace = true }
+sanjaya-django = { workspace = true }
+sanjaya-sqlalchemy = { workspace = true }
 
 [tool.pytest.ini_options]
 # Each package has its own conftest.py with package-specific fixtures.

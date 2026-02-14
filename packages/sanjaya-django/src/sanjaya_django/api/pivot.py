@@ -22,7 +22,7 @@ router = Router(tags=["pivot"], by_alias=True)
 
 
 @router.post(
-    "/{dataset_key}/pivot",
+    "/{dataset_key}/pivot/",
     response={
         200: ServerSideGetRowsResponse,
         400: CustomErrorResponse,

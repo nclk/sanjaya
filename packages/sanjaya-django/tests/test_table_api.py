@@ -25,7 +25,7 @@ import pytest
 #   2024  South   Gadget   270
 # ---------------------------------------------------------------------------
 
-TABLE_URL = "/datasets/test_trades/table"
+TABLE_URL = "/datasets/test_trades/table/"
 
 
 def _table_request(
@@ -837,7 +837,7 @@ class TestTableEdgeCases:
     def test_dataset_not_found(self, client, user):
         """Unknown dataset key → 404."""
         resp = client.post(
-            "/datasets/nonexistent/table",
+            "/datasets/nonexistent/table/",
             json=_table_request(),
             user=user,
         )

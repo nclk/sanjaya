@@ -34,7 +34,8 @@ pkg_dir = packages/$(1)
         test test-all clean help \
         tsp-build tsp-publish tsp-snapshot \
         mssql-up mssql-down mssql-test \
-        postgres-up postgres-down postgres-test
+        postgres-up postgres-down postgres-test \
+        demo-seed demo-migrate demo-server
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -162,6 +163,19 @@ postgres-down: ## Stop PostgreSQL container and remove volumes
 
 postgres-test: postgres-up ## Run PostgreSQL integration tests (starts container if needed)
 	SANJAYA_POSTGRES_URL="$(PG_URL)" uv run pytest packages/sanjaya-sqlalchemy/ -k postgres -v
+
+# ── Demo server ──────────────────────────────────────────────────
+
+DEMO_DIR := apps/demo-server
+
+demo-seed: mssql-up ## Seed Northwind data into MSSQL
+	cd $(DEMO_DIR) && SANJAYA_MSSQL_URL="$(MSSQL_URL)" uv run python seed_northwind.py
+
+demo-migrate: ## Run Django migrations (SQLite)
+	cd $(DEMO_DIR) && uv run python manage.py migrate
+
+demo-server: ## Run the Django demo server at localhost:8000
+	cd $(DEMO_DIR) && SANJAYA_MSSQL_URL="$(MSSQL_URL)" uv run python manage.py runserver 0.0.0.0:8000
 
 # ── Internal ─────────────────────────────────────────────────────
 

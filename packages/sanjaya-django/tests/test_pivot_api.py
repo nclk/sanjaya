@@ -10,7 +10,7 @@ class TestPivotAPI:
     def test_pivot_mode(self, client, user, mock_provider):
         """Pivot product over region, sum amount."""
         resp = client.post(
-            "/datasets/test_trades/pivot",
+            "/datasets/test_trades/pivot/",
             json={
                 "startRow": 0,
                 "endRow": 100,
@@ -42,7 +42,7 @@ class TestPivotAPI:
     def test_pivot_rejects_missing_pivot_cols(self, client, user, mock_provider):
         """400 when pivotMode is True but pivotCols is empty."""
         resp = client.post(
-            "/datasets/test_trades/pivot",
+            "/datasets/test_trades/pivot/",
             json={
                 "startRow": 0,
                 "endRow": 100,
@@ -71,7 +71,7 @@ class TestPivotAPI:
     def test_pivot_rejects_pivot_mode_false(self, client, user, mock_provider):
         """400 when pivotMode is False."""
         resp = client.post(
-            "/datasets/test_trades/pivot",
+            "/datasets/test_trades/pivot/",
             json={
                 "startRow": 0,
                 "endRow": 100,
@@ -106,7 +106,7 @@ class TestPivotAPI:
         )
 
         resp = client.post(
-            "/datasets/no_pivot/pivot",
+            "/datasets/no_pivot/pivot/",
             json={
                 "startRow": 0,
                 "endRow": 10,
@@ -122,7 +122,7 @@ class TestPivotAPI:
 
     def test_dataset_not_found(self, client, user):
         resp = client.post(
-            "/datasets/nope/pivot",
+            "/datasets/nope/pivot/",
             json={
                 "startRow": 0,
                 "endRow": 10,
@@ -138,7 +138,7 @@ class TestPivotAPI:
 
     def test_auth_required(self, client, mock_provider):
         resp = client.post(
-            "/datasets/test_trades/pivot",
+            "/datasets/test_trades/pivot/",
             json={
                 "startRow": 0,
                 "endRow": 10,

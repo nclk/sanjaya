@@ -194,7 +194,7 @@ def create_report(request, body: CreateDynamicReportRequest):
 
 
 @router.get(
-    "/stats",
+    "/stats/",
     response={200: DynamicReportStatsOut, 401: CustomErrorResponse},
     url_name="sanjaya-reports-stats",
 )
@@ -285,7 +285,7 @@ def update_report(request, report_id: int, body: UpdateDynamicReportRequest):
 
 
 @router.get(
-    "/{report_id}/actions",
+    "/{report_id}/actions/",
     response={200: dict, 401: CustomErrorResponse, 404: CustomErrorResponse},
     url_name="sanjaya-reports-actions-list",
 )
@@ -303,7 +303,7 @@ def list_actions(request, report_id: int):
 
 
 @router.post(
-    "/{report_id}/actions",
+    "/{report_id}/actions/",
     response={
         200: ActionResponse,
         400: CustomErrorResponse,
@@ -356,7 +356,7 @@ def perform_report_action(request, report_id: int, body: PerformActionRequest):
 
 
 @router.get(
-    "/{report_id}/shares",
+    "/{report_id}/shares/",
     response={200: ListSharesResponse, 401: CustomErrorResponse, 403: PermissionErrorResponse, 404: CustomErrorResponse},
     url_name="sanjaya-reports-shares-list",
 )
@@ -375,7 +375,7 @@ def list_shares(request, report_id: int):
 
 
 @router.post(
-    "/{report_id}/shares/users",
+    "/{report_id}/shares/users/",
     response={200: ListSharesResponse, 401: CustomErrorResponse, 403: PermissionErrorResponse, 404: CustomErrorResponse},
     url_name="sanjaya-reports-shares-users-upsert",
 )
@@ -403,7 +403,7 @@ def upsert_user_share(request, report_id: int, body: UpsertUserShareRequest):
 
 
 @router.delete(
-    "/{report_id}/shares/users",
+    "/{report_id}/shares/users/",
     response={200: ListSharesResponse, 401: CustomErrorResponse, 403: PermissionErrorResponse, 404: CustomErrorResponse},
     url_name="sanjaya-reports-shares-users-delete",
 )
@@ -425,7 +425,7 @@ def delete_user_share(request, report_id: int, body: DeleteUserShareRequest):
 
 
 @router.post(
-    "/{report_id}/shares/groups",
+    "/{report_id}/shares/groups/",
     response={200: ListSharesResponse, 401: CustomErrorResponse, 403: PermissionErrorResponse, 404: CustomErrorResponse},
     url_name="sanjaya-reports-shares-groups-upsert",
 )
@@ -453,7 +453,7 @@ def upsert_group_share(request, report_id: int, body: UpsertGroupShareRequest):
 
 
 @router.delete(
-    "/{report_id}/shares/groups",
+    "/{report_id}/shares/groups/",
     response={200: ListSharesResponse, 401: CustomErrorResponse, 403: PermissionErrorResponse, 404: CustomErrorResponse},
     url_name="sanjaya-reports-shares-groups-delete",
 )

@@ -16,7 +16,7 @@ router = Router(tags=["export"], by_alias=True)
 
 
 @router.post(
-    "/{dataset_key}/export",
+    "/{dataset_key}/export/",
     response={400: CustomErrorResponse, 401: CustomErrorResponse, 404: CustomErrorResponse},
     url_name="sanjaya-dataset-export",
 )

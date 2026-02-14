@@ -77,7 +77,7 @@ class TestReportsLifecycle:
     def test_publish_and_unpublish(self, client, user, report):
         # Publish
         resp = client.post(
-            f"/reports/{report.pk}/actions",
+            f"/reports/{report.pk}/actions/",
             json={"action": "publish"},
             user=user,
         )
@@ -86,7 +86,7 @@ class TestReportsLifecycle:
 
         # Unpublish
         resp = client.post(
-            f"/reports/{report.pk}/actions",
+            f"/reports/{report.pk}/actions/",
             json={"action": "unpublish"},
             user=user,
         )
@@ -96,13 +96,13 @@ class TestReportsLifecycle:
     def test_archive_and_restore(self, client, user, report):
         # Must publish first
         client.post(
-            f"/reports/{report.pk}/actions",
+            f"/reports/{report.pk}/actions/",
             json={"action": "publish"},
             user=user,
         )
         # Archive
         resp = client.post(
-            f"/reports/{report.pk}/actions",
+            f"/reports/{report.pk}/actions/",
             json={"action": "archive"},
             user=user,
         )
@@ -111,7 +111,7 @@ class TestReportsLifecycle:
 
         # Restore
         resp = client.post(
-            f"/reports/{report.pk}/actions",
+            f"/reports/{report.pk}/actions/",
             json={"action": "restore"},
             user=user,
         )
@@ -120,7 +120,7 @@ class TestReportsLifecycle:
 
     def test_delete_report(self, client, user, report):
         resp = client.post(
-            f"/reports/{report.pk}/actions",
+            f"/reports/{report.pk}/actions/",
             json={"action": "delete"},
             user=user,
         )
@@ -130,21 +130,21 @@ class TestReportsLifecycle:
 
     def test_forbidden_action(self, client, other_user, report):
         resp = client.post(
-            f"/reports/{report.pk}/actions",
+            f"/reports/{report.pk}/actions/",
             json={"action": "publish"},
             user=other_user,
         )
         assert resp.status_code == 403
 
     def test_list_actions(self, client, user, report):
-        resp = client.get(f"/reports/{report.pk}/actions", user=user)
+        resp = client.get(f"/reports/{report.pk}/actions/", user=user)
         assert resp.status_code == 200
         actions = resp.json()["actions"]
         assert "publish" in actions
         assert "edit" in actions
 
     def test_stats(self, client, user, report):
-        resp = client.get("/reports/stats", user=user)
+        resp = client.get("/reports/stats/", user=user)
         assert resp.status_code == 200
         data = resp.json()
         assert data["total"] >= 1
@@ -155,7 +155,7 @@ class TestReportsLifecycle:
 class TestReportsSharing:
     def test_upsert_and_list_user_share(self, client, user, other_user, report):
         resp = client.post(
-            f"/reports/{report.pk}/shares/users",
+            f"/reports/{report.pk}/shares/users/",
             json={"userId": str(other_user.pk), "permission": "viewer"},
             user=user,
         )
@@ -167,13 +167,13 @@ class TestReportsSharing:
     def test_delete_user_share(self, client, user, other_user, report):
         # Create share first
         client.post(
-            f"/reports/{report.pk}/shares/users",
+            f"/reports/{report.pk}/shares/users/",
             json={"userId": str(other_user.pk), "permission": "viewer"},
             user=user,
         )
         # Delete
         resp = client.delete(
-            f"/reports/{report.pk}/shares/users",
+            f"/reports/{report.pk}/shares/users/",
             json={"userId": str(other_user.pk)},
             user=user,
         )
@@ -181,7 +181,7 @@ class TestReportsSharing:
         assert len(resp.json()["users"]) == 0
 
     def test_non_owner_cannot_manage_shares(self, client, other_user, report):
-        resp = client.get(f"/reports/{report.pk}/shares", user=other_user)
+        resp = client.get(f"/reports/{report.pk}/shares/", user=other_user)
         assert resp.status_code == 403
 
     def test_shared_report_visible(self, client, user, other_user, report):
@@ -277,7 +277,7 @@ class TestFavoriteAction:
         """Favoriting then re-favoriting should toggle."""
         # Favorite
         resp = client.post(
-            f"/reports/{report.pk}/actions",
+            f"/reports/{report.pk}/actions/",
             json={"action": "favorite"},
             user=user,
         )
@@ -287,7 +287,7 @@ class TestFavoriteAction:
 
         # Unfavorite (toggle)
         resp = client.post(
-            f"/reports/{report.pk}/actions",
+            f"/reports/{report.pk}/actions/",
             json={"action": "favorite"},
             user=user,
         )
@@ -297,7 +297,7 @@ class TestFavoriteAction:
 
     def test_favorite_in_available_actions(self, client, user, report):
         """favorite should always appear in availableActions for a viewer+."""
-        resp = client.get(f"/reports/{report.pk}/actions", user=user)
+        resp = client.get(f"/reports/{report.pk}/actions/", user=user)
         assert resp.status_code == 200
         assert "favorite" in resp.json()["actions"]
 

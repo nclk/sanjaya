@@ -73,7 +73,7 @@ def list_datasets(request):
 
 
 @router.get(
-    "/{dataset_key}/columns",
+    "/{dataset_key}/columns/",
     response={200: ColumnsResponse, 401: CustomErrorResponse, 404: CustomErrorResponse},
     url_name="sanjaya-dataset-columns",
 )
@@ -93,7 +93,7 @@ def get_columns(request, dataset_key: str):
 
 
 @router.post(
-    "/{dataset_key}/preview",
+    "/{dataset_key}/preview/",
     response={200: PreviewResponse, 400: CustomErrorResponse, 401: CustomErrorResponse, 404: CustomErrorResponse},
     url_name="sanjaya-dataset-preview",
 )

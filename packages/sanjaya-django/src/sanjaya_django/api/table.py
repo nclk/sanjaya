@@ -22,7 +22,7 @@ router = Router(tags=["table"], by_alias=True)
 
 
 @router.post(
-    "/{dataset_key}/table",
+    "/{dataset_key}/table/",
     response={
         200: ServerSideGetRowsResponse,
         400: CustomErrorResponse,

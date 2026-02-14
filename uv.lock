@@ -5,6 +5,7 @@ requires-python = ">=3.12"
 [manifest]
 members = [
     "sanjaya-core",
+    "sanjaya-demo-server",
     "sanjaya-django",
     "sanjaya-sqlalchemy",
 ]
@@ -288,6 +289,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/17/f2/3e57ef696b95067e05ae206171e47a8e53b9c84eec56198671ef9eaa51a6/django-5.2.11.tar.gz", hash = "sha256:7f2d292ad8b9ee35e405d965fbbad293758b858c34bbf7f3df551aeeac6f02d3", size = 10885017, upload-time = "2026-02-03T13:52:50.554Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/91/a7/2b112ab430575bf3135b8304ac372248500d99c352f777485f53fdb9537e/django-5.2.11-py3-none-any.whl", hash = "sha256:e7130df33ada9ab5e5e929bc19346a20fe383f5454acb2cc004508f242ee92c0", size = 8291375, upload-time = "2026-02-03T13:52:42.47Z" },
+]
+
+[[package]]
+name = "django-cors-headers"
+version = "4.9.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "asgiref" },
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/21/39/55822b15b7ec87410f34cd16ce04065ff390e50f9e29f31d6d116fc80456/django_cors_headers-4.9.0.tar.gz", hash = "sha256:fe5d7cb59fdc2c8c646ce84b727ac2bca8912a247e6e68e1fb507372178e59e8", size = 21458, upload-time = "2025-09-18T10:40:52.326Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/30/d8/19ed1e47badf477d17fb177c1c19b5a21da0fd2d9f093f23be3fb86c5fab/django_cors_headers-4.9.0-py3-none-any.whl", hash = "sha256:15c7f20727f90044dcee2216a9fd7303741a864865f0c3657e28b7056f61b449", size = 12809, upload-time = "2025-09-18T10:40:50.843Z" },
 ]
 
 [[package]]
@@ -890,6 +904,36 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.0,<3" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8" },
     { name = "pytest-cov", marker = "extra == 'dev'" },
+]
+provides-extras = ["dev"]
+
+[[package]]
+name = "sanjaya-demo-server"
+version = "0.1.0"
+source = { editable = "apps/demo-server" }
+dependencies = [
+    { name = "django" },
+    { name = "django-cors-headers" },
+    { name = "django-ninja" },
+    { name = "sanjaya-django" },
+    { name = "sanjaya-sqlalchemy", extra = ["mssql"] },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-django" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "django", specifier = ">=4.2,<6" },
+    { name = "django-cors-headers", specifier = ">=4.0" },
+    { name = "django-ninja", specifier = ">=1.0,<2" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8" },
+    { name = "pytest-django", marker = "extra == 'dev'", specifier = ">=4.5" },
+    { name = "sanjaya-django", editable = "packages/sanjaya-django" },
+    { name = "sanjaya-sqlalchemy", extras = ["mssql"], editable = "packages/sanjaya-sqlalchemy" },
 ]
 provides-extras = ["dev"]
 

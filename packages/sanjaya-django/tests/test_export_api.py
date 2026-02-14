@@ -12,7 +12,7 @@ import pytest
 class TestExportAPI:
     def test_flat_csv_export(self, client, user, mock_provider):
         resp = client.post(
-            "/datasets/test_trades/export",
+            "/datasets/test_trades/export/",
             json={
                 "flat": {
                     "selectedColumns": ["year", "region", "amount"],
@@ -33,7 +33,7 @@ class TestExportAPI:
 
     def test_flat_xlsx_export(self, client, user, mock_provider):
         resp = client.post(
-            "/datasets/test_trades/export",
+            "/datasets/test_trades/export/",
             json={
                 "flat": {
                     "selectedColumns": ["year", "amount"],
@@ -47,7 +47,7 @@ class TestExportAPI:
 
     def test_pivot_csv_export(self, client, user, mock_provider):
         resp = client.post(
-            "/datasets/test_trades/export",
+            "/datasets/test_trades/export/",
             json={
                 "pivot": {
                     "rowGroupCols": [
@@ -77,7 +77,7 @@ class TestExportAPI:
 
     def test_flat_export_empty_selected_columns_rejected(self, client, user, mock_provider):
         resp = client.post(
-            "/datasets/test_trades/export",
+            "/datasets/test_trades/export/",
             json={"flat": {"selectedColumns": [], "format": "csv"}},
             user=user,
         )
@@ -85,7 +85,7 @@ class TestExportAPI:
 
     def test_empty_request_returns_400(self, client, user, mock_provider):
         resp = client.post(
-            "/datasets/test_trades/export",
+            "/datasets/test_trades/export/",
             json={},
             user=user,
         )
@@ -93,7 +93,7 @@ class TestExportAPI:
 
     def test_dataset_not_found(self, client, user):
         resp = client.post(
-            "/datasets/nope/export",
+            "/datasets/nope/export/",
             json={"flat": {"selectedColumns": ["x"], "format": "csv"}},
             user=user,
         )

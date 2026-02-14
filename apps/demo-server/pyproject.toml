@@ -1,0 +1,27 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sanjaya-demo-server"
+version = "0.1.0"
+description = "Django demo server for Sanjaya — Northwind dataset over MSSQL"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+dependencies = [
+    "django>=4.2,<6",
+    "django-ninja>=1.0,<2",
+    "django-cors-headers>=4.0",
+    "sanjaya-django~=1.0",
+    "sanjaya-sqlalchemy[mssql]~=1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "pytest-django>=4.5",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["demo"]
