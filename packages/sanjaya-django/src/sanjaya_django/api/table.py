@@ -1,4 +1,4 @@
-"""AG Grid SSRM pivot endpoint."""
+"""AG Grid SSRM table endpoint — flat data, row grouping, aggregation (no pivot)."""
 
 from __future__ import annotations
 
@@ -12,43 +12,29 @@ from sanjaya_core.exceptions import (
 
 from sanjaya_django.registry import registry
 from sanjaya_django.schemas.errors import CustomErrorResponse, ErrorDetail, make_not_found
-from sanjaya_django.schemas.pivot import (
-    ServerSideGetRowsRequest,
+from sanjaya_django.schemas.ssrm import (
     ServerSideGetRowsResponse,
+    TableGetRowsRequest,
 )
-from sanjaya_django.services.ssrm import handle_ssrm_request
+from sanjaya_django.services.ssrm import handle_table_ssrm_request
 
-router = Router(tags=["pivot"], by_alias=True)
+router = Router(tags=["table"], by_alias=True)
 
 
 @router.post(
-    "/{dataset_key}/pivot",
+    "/{dataset_key}/table",
     response={
         200: ServerSideGetRowsResponse,
         400: CustomErrorResponse,
         401: CustomErrorResponse,
         404: CustomErrorResponse,
-        501: CustomErrorResponse,
     },
-    url_name="sanjaya-dataset-pivot",
+    url_name="sanjaya-dataset-table",
 )
-def pivot(request, dataset_key: str, body: ServerSideGetRowsRequest):
+def table(request, dataset_key: str, body: TableGetRowsRequest):
     if not (request.user and request.user.is_authenticated):
         return 401, CustomErrorResponse(
             details=[ErrorDetail(error_type="auth", message="Authentication required")]
-        )
-
-    if not body.pivot_mode or not body.pivot_cols:
-        return 400, CustomErrorResponse(
-            details=[
-                ErrorDetail(
-                    error_type="validation",
-                    message=(
-                        "The /pivot endpoint requires pivotMode: true and at least "
-                        "one pivot column. Use the /table endpoint for non-pivot queries."
-                    ),
-                )
-            ]
         )
 
     try:
@@ -56,24 +42,14 @@ def pivot(request, dataset_key: str, body: ServerSideGetRowsRequest):
     except DatasetNotFoundError:
         return 404, make_not_found("Dataset", dataset_key)
 
-    if body.pivot_mode and not provider.capabilities.pivot:
-        return 501, CustomErrorResponse(
-            details=[
-                ErrorDetail(
-                    error_type="not_supported",
-                    message=f"Dataset {dataset_key!r} does not support pivoting",
-                )
-            ]
-        )
-
     ctx = RequestContext(
         user_id=str(request.user.pk) if request.user.pk else None,
     )
 
     try:
-        response = handle_ssrm_request(provider, body, ctx=ctx)
+        response = handle_table_ssrm_request(provider, body, ctx=ctx)
     except AggregationNotSupportedError as exc:
-        return 501, CustomErrorResponse(
+        return 400, CustomErrorResponse(
             details=[ErrorDetail(error_type="not_supported", message=str(exc))]
         )
     except Exception as exc:
