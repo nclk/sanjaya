@@ -1,4 +1,6 @@
+import "@typespec/http";
 import "../../models/dynamic-reports.tsp";
+
 using TypeSpec.Http;
 using Models;
 

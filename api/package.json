@@ -21,9 +21,9 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsp compile compile.tsp",
-    "watch": "tsp compile compile.tsp --watch",
-    "prepack": "tsp compile compile.tsp"
+    "build": "tsp compile .",
+    "watch": "tsp compile . --watch",
+    "prepack": "tsp compile ."
   },
   "packageManager": "pnpm@10.29.3",
   "peerDependencies": {
