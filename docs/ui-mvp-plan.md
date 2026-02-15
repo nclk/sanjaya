@@ -1,35 +1,44 @@
-# Sanjaya UI — MVP Implementation Plan
+# Sanjaya UI — React + MUI MVP Implementation Plan
 
-> Reusable web-component report builder for the Sanjaya dynamic reporting
-> platform. Zero-framework, Shadow DOM, CSS custom properties for theming.
+> Reusable React component library for the Sanjaya dynamic reporting
+> platform. Built with MUI 7, AG Grid Enterprise 32, and TypeScript.
+> The host app injects a `SanjayaClient` implementation — the library
+> owns no networking, caching, or auth logic.
 
 ## Architecture Overview
 
-A suite of custom elements composable into a single
-`<sj-report-builder>` shell. The host application injects a
-**data-access client** conforming to a published TypeScript interface; the
-components never assume endpoint URLs, authentication strategy, or HTTP
-library.
+A React component library (`@pojagi/sanjaya-ui`) that exports composable
+components and a provider. The host application implements the
+`SanjayaClient` interface and wraps the component tree in
+`<SanjayaProvider>`. Components never assume endpoint URLs,
+authentication strategy, or HTTP library.
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
-│  Host Application (React + MUI, Angular, vanilla, …)               │
+│  Host Application                                                    │
 │                                                                      │
+│  <SanjayaProvider client={mySanjayaClient}>                          │
 │  ┌────────────────────────────────────────────────────────────────┐  │
-│  │  <sj-report-builder>                                      │  │
+│  │  <ReportBuilder>                                               │  │
 │  │  ┌──────────────┐ ┌──────────────────┐ ┌───────────────────┐  │  │
 │  │  │ Dataset      │ │ Column           │ │ Filter            │  │  │
 │  │  │ Picker       │ │ Selector         │ │ Builder           │  │  │
 │  │  └──────────────┘ └──────────────────┘ └───────────────────┘  │  │
 │  │  ┌──────────────────┐  ┌────────────────────────────────────┐ │  │
-│  │  │ Pivot Config     │  │ Actions Menu + Dirty-state bar     │ │  │
+│  │  │ Pivot            │  │ DataGrid (AG Grid SSRM)            │ │  │
+│  │  │ Configurator     │  │ Table + Pivot tabs                 │ │  │
 │  │  └──────────────────┘  └────────────────────────────────────┘ │  │
-│  └────────────────────────────────────┬───────────────────────────┘  │
-│                                       │ SanjayaDataClient            │
-│                    ┌──────────────────┴──────────────────┐           │
-│                    │ Host-provided client implementation  │           │
-│                    │ (openapi-fetch, hand-rolled, etc.)   │           │
-│                    └─────────────────────────────────────┘           │
+│  │  ┌────────────────────────────────────────────────────────────┐│  │
+│  │  │ Toolbar: Save, Export, Actions menu, Dirty indicator      ││  │
+│  │  └────────────────────────────────────────────────────────────┘│  │
+│  └────────────────────────────────────────────────────────────────┘  │
+│                        │                                             │
+│         ┌──────────────┴──────────────┐                              │
+│         │ Host-provided SanjayaClient │                              │
+│         │ (any HTTP client, caching,  │                              │
+│         │  auth strategy the host     │                              │
+│         │  already uses)              │                              │
+│         └─────────────────────────────┘                              │
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -37,15 +46,17 @@ library.
 
 | Concern | Choice | Rationale |
 |---------|--------|-----------|
-| Component model | Custom Elements v1 + Shadow DOM | Zero-framework, works in any host |
+| UI framework | React ^18.3.1 | Host team's existing stack; enables rapid prototyping |
+| Component library | MUI ^7.2.0 | Rich form controls, theming, layout primitives |
+| Grid | AG Grid Enterprise ^32.0.0 via `ag-grid-react` | SSRM, pivot, row grouping — Enterprise features |
 | Package scope | `@pojagi/sanjaya-ui` | All published JS/TS packages use the `@pojagi` npm scope |
-| Templating | `@pojagi/build-templates` | Author `.html` with full IDE support; compile to importable TS strings |
-| Styling | CSS custom properties (`--sanjaya-*`) | Host restyles without touching internals; MUI theme mapping is trivial |
-| Types | Hand-authored TS types (mirroring TypeSpec models) | No codegen dep; host can optionally derive their own from the published TypeSpec |
-| Drag-and-drop | `@atlaskit/pragmatic-drag-and-drop` (~8 kB) | Framework-agnostic, mobile support, polished UX |
-| AG Grid compat | `ag-grid-enterprise` **^32.0.0** | SSRM is an Enterprise feature; our types and `SanjayaDataClient` response shapes must match AG Grid 32's `IServerSideDatasource` contract |
-| Build | `@pojagi/build-templates` → `tsc` → ESM output | Simple, auditable pipeline |
-| Tests | `@web/test-runner` + Playwright | Real browser tests for custom elements |
+| Data access | `SanjayaClient` interface (host-injected via React context) | Library owns no networking — host controls HTTP, auth, caching |
+| Types | Hand-authored TS types + auto-generated from OpenAPI via `openapi-typescript` | Keep in sync with TypeSpec; host can also import TypeSpec sources directly |
+| State management | `useReducer` in ReportBuilder orchestrator | Minimal footprint — no additional dependencies |
+| Drag-and-drop | HTML5 native DnD API | Zero-dependency; sufficient for zone-based drag (Available → Rows / Pivot / Values) |
+| Build | Vite library mode + `tsc` | ESM output with declarations; peer deps externalized |
+| Tests | Vitest + React Testing Library | Fast, modern test tooling |
+| Licensing | AG Grid Enterprise runs fully without a license key (shows watermark) | Host injects `LicenseManager.setLicenseKey()` in their own entry point |
 
 ---
 
@@ -53,498 +64,424 @@ library.
 
 ```
 packages/sanjaya-ui/
-├── package.json
+├── package.json                      # @pojagi/sanjaya-ui
 ├── tsconfig.json
+├── vite.config.ts                    # Library mode, peer deps externalized
 ├── README.md
 ├── src/
-│   ├── index.ts                     # public entry — re-exports all elements + types
-│   ├── types/
-│   │   ├── client.ts                # SanjayaDataClient interface
-│   │   ├── columns.ts               # ColumnMeta, FormatHints, PivotOptions, …
-│   │   ├── filters.ts               # FilterGroup, FilterCondition, operators
-│   │   ├── datasets.ts              # DatasetSummary, DatasetCapabilities
-│   │   ├── ssrm.ts                  # ColumnVO, SortModelItem, SSRMRequest/Response
-│   │   ├── reports.ts               # DynamicReport, DynamicReportDefinition, actions
-│   │   └── index.ts
-│   ├── themes/
-│   │   ├── light.css                # default light theme (sets all --sanjaya-* vars)
-│   │   └── dark.css                 # default dark theme
-│   ├── shared/
-│   │   ├── state.ts                 # DirtyTracker, simple reactive store
-│   │   └── events.ts               # typed CustomEvent helpers
-│   ├── dataset-picker/
-│   │   ├── dataset-picker.html      # template source
-│   │   └── dataset-picker.ts        # <sj-dataset-picker> element
-│   ├── column-selector/
-│   │   ├── column-selector.html
-│   │   └── column-selector.ts       # <sj-column-selector> element
-│   ├── filter-builder/
-│   │   ├── filter-builder.html
-│   │   ├── filter-condition.html
-│   │   ├── filter-group.html
-│   │   └── filter-builder.ts        # <sj-filter-builder> element
-│   ├── pivot-config/
-│   │   ├── pivot-config.html
-│   │   ├── pivot-panel.html
-│   │   └── pivot-config.ts          # <sj-pivot-config> element
-│   └── report-builder/
-│       ├── report-builder.html
-│       └── report-builder.ts        # <sj-report-builder> orchestrator
-└── test/
-    ├── dataset-picker.test.ts
-    ├── column-selector.test.ts
-    ├── filter-builder.test.ts
-    ├── pivot-config.test.ts
-    └── report-builder.test.ts
+│   ├── index.ts                      # Public entry — re-exports everything
+│   ├── api/
+│   │   ├── types.ts                  # Hand-written ergonomic TS types
+│   │   ├── generated.ts             # Auto-generated by openapi-typescript
+│   │   └── client.ts                # SanjayaClient interface
+│   ├── providers/
+│   │   └── SanjayaProvider.tsx       # React context provider + useSanjayaClient hook
+│   ├── state/
+│   │   └── reportBuilderState.ts     # Reducer, actions, dirty tracking
+│   └── components/
+│       ├── index.ts                  # Barrel exports
+│       ├── DatasetPicker.tsx         # MUI Autocomplete dataset selector
+│       ├── ColumnSelector.tsx        # Checkbox list with type grouping
+│       ├── FilterBuilder.tsx         # Recursive FilterGroup/FilterCondition editor
+│       ├── PivotConfigurator.tsx     # DnD zone builder for row groups / pivot / values
+│       ├── DataGrid.tsx              # AG Grid SSRM wrapper (Table + Pivot tabs)
+│       └── ReportBuilder.tsx         # Top-level orchestrator (sidebar + grid + toolbar)
+└── tests/                            # (future) Vitest + RTL tests
 ```
 
 ---
 
-## Phase 1 — Types, client interface, theming, shared utilities
+## Phase 1 — Types, client interface, provider, state
 
-### 1.1 `SanjayaDataClient` interface
+### 1.1 `SanjayaClient` interface
 
-The host implements this and passes it as a property on
-`<sj-report-builder>`. Methods map to the Sanjaya REST surface:
+Defined in `src/api/client.ts`. The host implements this and passes it to
+`<SanjayaProvider>`. Methods map 1:1 to the Sanjaya REST surface:
 
 ```ts
-interface SanjayaDataClient {
-  // Dataset operations
-  listDatasets(): Promise<DatasetSummary[]>;
-  getColumns(datasetKey: string): Promise<ColumnMeta[]>;
+interface SanjayaClient {
+  // Datasets
+  listDatasets(): Promise<DatasetsResponse>;
+  getColumns(datasetKey: string): Promise<ColumnsResponse>;
+  preview(datasetKey: string, body: PreviewRequest): Promise<PreviewResponse>;
 
-  // SSRM queries (the host decides URL, auth, headers)
-  queryTable(datasetKey: string, request: TableSSRMRequest): Promise<SSRMResponse>;
-  queryPivot(datasetKey: string, request: PivotSSRMRequest): Promise<SSRMResponse>;
+  // SSRM endpoints
+  tableQuery(datasetKey: string, body: TableGetRowsRequest): Promise<ServerSideGetRowsResponse>;
+  pivotQuery(datasetKey: string, body: ServerSideGetRowsRequest): Promise<ServerSideGetRowsResponse>;
 
-  // Export (returns a download — host may open a new tab, return a Blob, etc.)
-  exportData(datasetKey: string, request: ExportRequest): Promise<Blob | void>;
+  // Export (returns a Blob)
+  exportData(datasetKey: string, body: ExportRequest): Promise<Blob>;
 
-  // Report CRUD
-  listReports(params?: ReportListParams): Promise<ReportListResponse>;
+  // Reports CRUD
+  listReports(params?): Promise<ListDynamicReportsResponse>;
   getReport(reportId: string): Promise<DynamicReport>;
-  createReport(payload: CreateReportRequest): Promise<DynamicReport>;
-  updateReport(reportId: string, payload: UpdateReportRequest): Promise<DynamicReport>;
-  performAction(reportId: string, action: DynamicReportAction, payload?: Record<string, unknown>): Promise<DynamicReport>;
+  createReport(body: CreateDynamicReportRequest): Promise<DynamicReport>;
+  updateReport(reportId: string, body: UpdateDynamicReportRequest): Promise<DynamicReport>;
 
-  // Sharing
-  listShares(reportId: string): Promise<ShareListResponse>;
-  upsertUserShare(reportId: string, payload: UserShareRequest): Promise<void>;
-  removeUserShare(reportId: string, userId: string): Promise<void>;
-  upsertGroupShare(reportId: string, payload: GroupShareRequest): Promise<void>;
-  removeGroupShare(reportId: string, groupId: string): Promise<void>;
+  // Lifecycle actions
+  getAvailableActions(reportId: string): Promise<AvailableActionsResponse>;
+  performAction(reportId: string, body: PerformDynamicReportActionRequest): Promise<DynamicReportActionResponse>;
+  getReportStats(): Promise<DynamicReportStats>;
+
+  // Shares
+  listShares(reportId: string): Promise<ListDynamicReportSharesResponse>;
+  upsertUserShare(reportId, body): Promise<ListDynamicReportSharesResponse>;
+  deleteUserShare(reportId, body): Promise<ListDynamicReportSharesResponse>;
+  upsertGroupShare(reportId, body): Promise<ListDynamicReportSharesResponse>;
+  deleteGroupShare(reportId, body): Promise<ListDynamicReportSharesResponse>;
 }
 ```
 
-The component validates that `client` is set before making any calls and
-emits a clear error event if it is missing.
+The library ships **no** default implementation. The host provides its own
+(backed by `fetch`, `axios`, `openapi-fetch`, React Query, or whatever it
+already uses). This means:
 
-### 1.2 Hand-authored TS types
+- No networking dependencies in the library.
+- No assumptions about base URLs, auth headers, or CSRF tokens.
+- No React Query hooks to maintain — the host owns data-fetching strategy.
 
-Slim types derived from the TypeSpec models. Published from the package
-entry point so host apps can implement `SanjayaDataClient` without running
-TypeSpec tooling themselves. Key types:
+Hosts wanting auto-generated type-safe clients can import the TypeSpec
+sources from `api/` directly into their own TypeSpec projects, or use
+`openapi-typescript` + `openapi-fetch` against the published OpenAPI spec.
 
-- `ColumnMeta`, `ColumnType`, `FormatHints`, `FormatHintKind`
-- `CurrencyOptions`, `CurrencyMagnitude`
-- `PivotOptions`, `PivotAggOption`, `AggFunc`
-- `FilterGroup`, `FilterCondition`, `FilterOperator`, `FilterCombinator`,
-  `FilterStyle`
-- `DatasetSummary`, `DatasetCapabilities`
-- `ColumnVO`, `SortModelItem`
-- `TableSSRMRequest`, `PivotSSRMRequest`, `SSRMResponse`, `PivotResultColDef`
-- `ExportRequest`, `ExportFormat`
-- `DynamicReport`, `DynamicReportSummary`, `DynamicReportDefinition`,
-  `DynamicReportAction`, `DynamicReportStatus`
-- Report CRUD request/response types
-- Share types
+### 1.2 TypeScript types
 
-### 1.3 CSS custom-property surface
+Hand-written ergonomic types in `src/api/types.ts` that mirror the
+TypeSpec / OpenAPI specification. All component props and the
+`SanjayaClient` interface reference these types.
 
-Every component's Shadow DOM references `--sanjaya-*` variables. The
-package ships two importable theme files (`themes/light.css`,
-`themes/dark.css`) that set all variables on `:root`. Hosts override any
-subset.
+The `generate:types` npm script runs `openapi-typescript` against the
+compiled `openapi.yaml` to produce `src/api/generated.ts`. This provides
+a raw path-level type tree for advanced usage but is not required for
+basic component consumption.
 
-Variable groups:
+Key type groups:
 
-| Prefix | Purpose | Examples |
-|--------|---------|---------|
-| `--sanjaya-color-*` | Palette | `--sanjaya-color-primary`, `-surface`, `-on-surface`, `-error`, `-border` |
-| `--sanjaya-color-*-hover` | Interactive states | `--sanjaya-color-primary-hover` |
-| `--sanjaya-spacing-*` | Spacing scale | `--sanjaya-spacing-xs` through `-xl` |
-| `--sanjaya-radius-*` | Border radii | `--sanjaya-radius-sm`, `-md`, `-lg` |
-| `--sanjaya-font-*` | Typography | `--sanjaya-font-family`, `-size-sm`, `-size-md`, `-weight-bold` |
-| `--sanjaya-elevation-*` | Shadows | `--sanjaya-elevation-1`, `-2`, `-3` |
-| `--sanjaya-transition-*` | Motion | `--sanjaya-transition-fast`, `-normal` |
+| Group | Types |
+|-------|-------|
+| Enums | `ColumnType`, `FilterOperator`, `FilterCombinator`, `AggFunc`, `ExportFormat`, `DynamicReportAction`, `DynamicReportStatus`, `DynamicReportPermission` |
+| Column metadata | `Column`, `ColumnFormatHints`, `ColumnPivotOptions`, `CurrencyOptions` |
+| Filters | `FilterCondition`, `FilterGroup` |
+| AG Grid wire | `ColumnVO`, `SortModelItem`, `SSRMBaseRequest`, `TableGetRowsRequest`, `ServerSideGetRowsRequest`, `ServerSideGetRowsResponse`, `PivotResultColDef` |
+| Datasets | `Dataset`, `DatasetsResponse`, `ColumnsResponse` |
+| Reports | `DynamicReport`, `DynamicReportSummary`, `DynamicReportDefinition`, `DynamicReportMetadata`, CRUD requests/responses |
+| Shares | `DynamicReportUserShare`, `DynamicReportGroupShare`, upsert/delete requests |
+| Errors | `ErrorDetail`, `CustomErrorResponse` |
 
-Default themes respect `prefers-color-scheme`. MUI hosts map their palette:
+### 1.3 `<SanjayaProvider>` and `useSanjayaClient()`
 
-```ts
-// React wrapper (thin)
-const sanjayaVars = {
-  '--sanjaya-color-primary': theme.palette.primary.main,
-  '--sanjaya-color-surface': theme.palette.background.paper,
-  '--sanjaya-color-on-surface': theme.palette.text.primary,
-  '--sanjaya-color-border': theme.palette.divider,
-  // …
-};
+A simple React context provider. All Sanjaya components call
+`useSanjayaClient()` internally to get the host-injected client:
+
+```tsx
+<SanjayaProvider client={mySanjayaClient}>
+  <ReportBuilder />
+</SanjayaProvider>
 ```
 
-### 1.4 Shared utilities
+`useSanjayaClient()` throws a clear error if used outside a provider.
 
-**`DirtyTracker<T>`** — generic class that holds `applied: T` and
-`current: T`. Exposes `isDirty: boolean` (deep comparison), `apply()`,
-`undo()`, and `reset(initial)`. Each panel component owns one tracker.
+### 1.4 Report builder state
 
-**`TypedEvent<T>`** — helper to dispatch `CustomEvent<T>` on the host
-element and optionally invoke a callback prop.
-
-**Callback + Event hybrid pattern:**
-
-```ts
-// Every component supports both patterns:
-//   1. DOM event:   el.addEventListener('filter-change', handler)
-//   2. Callback:    el.onFilterChange = handler
-
-protected emit<T>(name: string, detail: T): void {
-  this.dispatchEvent(new CustomEvent(name, { detail, bubbles: true, composed: true }));
-  const cb = (this as any)[`on${capitalize(camelize(name))}`];
-  if (typeof cb === 'function') cb(detail);
-}
-```
-
-### 1.5 Deliverables
-
-- [ ] Package scaffolded, builds with `build-templates` → `tsc`
-- [ ] All TS types exported from entry point
-- [ ] `SanjayaDataClient` interface finalized
-- [ ] Light and dark theme CSS files
-- [ ] `DirtyTracker` and event helpers with unit tests
-
----
-
-## Phase 2 — `<sj-dataset-picker>`
-
-### Behavior
-
-- On mount (or when `client` is set), calls `client.listDatasets()`.
-- Renders a searchable single-select dropdown.
-- User selects a dataset → updates internal state, marks panel dirty.
-- "Apply" confirms the selection → emits `dataset-change` event with
-  `{ key: string, label: string }`.
-- "Undo" reverts to last-applied dataset.
-- When the applied dataset changes, sibling panels reset (orchestrator
-  responsibility).
-
-### Attributes / properties
-
-| Name | Type | Description |
-|------|------|-------------|
-| `client` | `SanjayaDataClient` | Injected by orchestrator |
-| `value` | `string` | Currently applied dataset key |
-| `onDatasetChange` | `(detail) => void` | Optional callback |
-
-### Dirty state
-
-`DirtyTracker<string | null>` — tracks selected key vs. applied key.
-
-### 2.1 Deliverables
-
-- [ ] Element registered as `sj-dataset-picker`
-- [ ] Searchable dropdown with keyboard navigation
-- [ ] Apply / Undo controls
-- [ ] Event + callback dispatch
-- [ ] Tests: selection, search filtering, dirty state, undo
-
----
-
-## Phase 3 — `<sj-column-selector>`
-
-### Behavior
-
-- Receives `datasetKey` from orchestrator; calls `client.getColumns(key)`.
-- Renders a reorderable checklist of columns. Each row shows:
-  - Drag handle
-  - Checkbox (selected / not selected)
-  - Column label
-  - `isGroup` toggle (switch) — marks the column as a row-group column
-- Drag-and-drop reordering via `@atlaskit/pragmatic-drag-and-drop`.
-- Columns with `pivotOptions.role === "measure"` cannot be toggled as
-  `isGroup` (grayed out).
-
-### Tracked state shape
-
-```ts
-interface ColumnSelection {
-  columns: Array<{
-    name: string;
-    selected: boolean;
-    isGroup: boolean;
-    order: number;
-  }>;
-}
-```
-
-### Attributes / properties
-
-| Name | Type | Description |
-|------|------|-------------|
-| `client` | `SanjayaDataClient` | Injected |
-| `dataset-key` | `string` | Which dataset's columns to load |
-| `value` | `ColumnSelection` | Current applied state |
-| `onColumnsChange` | `(detail) => void` | Optional callback |
-
-### Dirty state
-
-`DirtyTracker<ColumnSelection>` — tracks order, selection, and group
-toggles vs. last-applied state.
-
-### 3.1 Deliverables
-
-- [ ] Element registered as `sj-column-selector`
-- [ ] Drag-and-drop reordering (desktop + mobile)
-- [ ] isGroup toggle with measure-column guard
-- [ ] Select all / deselect all
-- [ ] Apply / Undo controls
-- [ ] Tests: reorder, toggle, dirty state, measure guard
-
----
-
-## Phase 4 — `<sj-filter-builder>`
-
-### Two modes
-
-Toggled via a `mode` attribute (`"basic"` | `"advanced"`):
-
-#### Basic mode
-
-- Flat list of conditions, no visible combinator (implicit AND).
-- Each condition row: **Column** dropdown → **Operator** dropdown
-  (defaults to "ALL" / pass-through) → **Value** input.
-- Operator list driven by `ColumnMeta.operators` for the selected column.
-- Value input adapts to column type:
-  - `string` → text input
-  - `number`, `currency`, `percentage` → number input
-  - `date`, `datetime` → date/datetime picker
-  - `boolean` → checkbox / toggle
-  - `filterStyle: "select"` → multi-select from `ColumnMeta.enumValues`
-  - `operator: "between"` → two value inputs
-  - `operator: "in"` → comma-separated / tag input
-  - `operator: "isNull"` / `"isNotNull"` → no value input
-- Add / remove condition buttons.
-- "ALL" pseudo-operator means "no filter on this column" — the condition
-  is excluded from the emitted `FilterGroup`.
-
-#### Advanced mode
-
-- Full recursive `FilterGroup` tree editor.
-- Each group has:
-  - **Combinator** toggle: AND / OR
-  - **NOT** toggle (negation at group level)
-  - Nested conditions (same row UI as basic mode, plus per-condition NOT
-    toggle)
-  - Nested sub-groups (add group button)
-  - Remove group button
-- Root group is always present and cannot be removed.
-
-### Emitted shape
-
-Both modes emit a `FilterGroup` (the sanjaya-core format). Basic mode
-produces:
-
-```json
-{
-  "combinator": "and",
-  "conditions": [ /* non-ALL conditions only */ ]
-}
-```
-
-### Attributes / properties
-
-| Name | Type | Description |
-|------|------|-------------|
-| `client` | `SanjayaDataClient` | Injected |
-| `dataset-key` | `string` | For loading column metadata |
-| `mode` | `"basic" \| "advanced"` | Filter mode (default: `"basic"`) |
-| `value` | `FilterGroup` | Current applied filter |
-| `onFilterChange` | `(detail) => void` | Optional callback |
-
-### Dirty state
-
-`DirtyTracker<FilterGroup>` — tracks current tree vs. last-applied tree.
-
-### 4.1 Deliverables
-
-- [ ] Element registered as `sj-filter-builder`
-- [ ] Basic mode: flat AND list with ALL default
-- [ ] Advanced mode: recursive groups with AND/OR/NOT
-- [ ] Operator-driven value input adaptation
-- [ ] `filterStyle: "select"` renders multi-select from `enumValues`
-- [ ] `between` renders two value inputs
-- [ ] Apply / Undo controls
-- [ ] Mode toggle (basic ↔ advanced) preserves compatible state
-- [ ] Tests: both modes, operator adaptation, dirty state, serialization
-
----
-
-## Phase 5 — `<sj-pivot-config>`
-
-### Behavior
-
-- Enabled only when the active dataset's `capabilities.pivot` is `true`.
-  Otherwise renders a disabled/hidden state with explanatory text.
-- Three sub-panels, each a drop-target list:
-
-| Panel | Purpose | Accepts | Maps to |
-|-------|---------|---------|---------|
-| **Rows** | Row-group dimensions | Columns with `pivotOptions.role === "dimension"` | `rowGroupCols` (as `ColumnVO[]`) |
-| **Columns** | Pivot (cross-tab) dimensions | Columns with `pivotOptions.role === "dimension"` | `pivotCols` (as `ColumnVO[]`) |
-| **Values** | Measures with agg function | Columns with `pivotOptions.role === "measure"` | `valueCols` (as `ColumnVO[]` with `aggFunc`) |
-
-- **Values panel**: each dropped column shows an `AggFunc` dropdown
-  constrained by that column's `pivotOptions.allowedAggs`. Defaults to the
-  first allowed agg.
-- Columns can be dragged between Rows and Columns panels (both accept
-  dimensions). A column cannot appear in both Rows and Columns
-  simultaneously.
-- Drag-and-drop within panels controls ordering.
-
-### Tracked state shape
-
-```ts
-interface PivotConfig {
-  rowGroupCols: ColumnVO[];
-  pivotCols: ColumnVO[];
-  valueCols: ColumnVO[];   // each has aggFunc set
-}
-```
-
-### Attributes / properties
-
-| Name | Type | Description |
-|------|------|-------------|
-| `client` | `SanjayaDataClient` | Injected |
-| `dataset-key` | `string` | For loading column metadata |
-| `value` | `PivotConfig` | Current applied config |
-| `disabled` | `boolean` | Set by orchestrator when pivot not supported |
-| `onPivotConfigChange` | `(detail) => void` | Optional callback |
-
-### Dirty state
-
-`DirtyTracker<PivotConfig>` — tracks current layout vs. last-applied.
-
-### 5.1 Deliverables
-
-- [ ] Element registered as `sj-pivot-config`
-- [ ] Three sub-panels with drag-and-drop
-- [ ] AggFunc picker constrained by `allowedAggs`
-- [ ] Dimension exclusivity (Rows ↔ Columns, not both)
-- [ ] Disabled state when `capabilities.pivot` is false
-- [ ] Apply / Undo controls
-- [ ] Tests: drag between panels, agg selection, disabled state, dirty state
-
----
-
-## Phase 6 — `<sj-report-builder>` orchestrator
-
-### Responsibilities
-
-1. **Compose** all child components into a coherent layout.
-2. **Inject `client`** downward to all children.
-3. **Coordinate data flow**: when dataset changes → reset columns, filters,
-   pivot config; when columns load → update filter builder's column list
-   and pivot config's available columns.
-4. **Two-tier dirty state**:
-   - **Panel-level**: each child tracks current vs. applied state. Panels
-     show "Apply" / "Undo" buttons when dirty.
-   - **Report-level**: any applied state differs from last-saved state →
-     report is dirty. Enables "Save" in the Actions menu, shows an unsaved
-     indicator.
-5. **Actions menu**: dropdown driven by the report's `availableActions`
-   from the server, plus client-only actions:
-
-   | Action | Source | Enabled when |
-   |--------|--------|-------------|
-   | Save | client | Report is dirty (applied ≠ saved) |
-   | Save As / Duplicate | client | Always (creates new report) |
-   | Reset | client | Report is dirty |
-   | Clear All | client | Any panel has non-default state |
-   | Export As… | client → `client.exportData()` | Dataset selected |
-   | Publish | server (`availableActions`) | Report is saved + action available |
-   | Unpublish | server | Action available |
-   | Archive | server | Action available |
-   | Restore | server | Action available |
-   | Share… | server | Action available |
-   | Transfer Ownership | server | Action available |
-   | Favorite | server | Action available (see backend addenda) |
-   | Delete | server | Action available |
-
-6. **`getReportDefinition()`** method — returns the current applied state
-   as a `DynamicReportDefinition`-shaped object (extended with pivot
-   config — see backend addenda).
-7. **`report-definition-change`** event — emitted whenever applied state
-   changes, so reactive host frameworks can bind to it.
-
-### Attributes / properties
-
-| Name | Type | Description |
-|------|------|-------------|
-| `client` | `SanjayaDataClient` | **Required.** Host-provided data client |
-| `report-id` | `string` | Load an existing saved report on mount |
-| `onReportDefinitionChange` | `(def) => void` | Optional callback |
-| `onAction` | `(action, report) => void` | Optional callback for lifecycle actions |
-
-### State management
-
-The orchestrator maintains a simple reactive store (plain object +
-`Proxy`-based change notification). State shape:
+Managed via `useReducer` in the `ReportBuilder` orchestrator. State shape:
 
 ```ts
 interface ReportBuilderState {
   datasetKey: string | null;
-  columns: ColumnSelection;
-  filter: FilterGroup;
-  pivotConfig: PivotConfig;
-  savedSnapshot: ReportBuilderState | null;  // last-saved state for diff
-  report: DynamicReport | null;              // server-side report metadata
+  columns: Column[];
+  datasets: Dataset[];
+  selectedColumns: string[];
+  filterGroup: FilterGroup;
+  rowGroupCols: ColumnVO[];
+  pivotCols: ColumnVO[];
+  valueCols: ColumnVO[];
+  sortModel: SortModelItem[];
+  activeTab: "table" | "pivot";
+  loading: { datasets: boolean; columns: boolean };
+  error: string | null;
+  lastSavedSnapshot: SavedSnapshot | null;
 }
 ```
 
-Flow:
-1. Properties flow **down** (orchestrator → children via property assignment).
-2. Events bubble **up** (children → orchestrator via `CustomEvent`).
-3. On "Apply" in any panel → orchestrator updates its applied state →
-   compares with `savedSnapshot` → updates report-level dirty indicator →
-   emits `report-definition-change`.
-4. On "Save" → orchestrator calls `client.createReport()` or
-   `client.updateReport()` → on success, snapshots current state as
-   `savedSnapshot` → clears report-level dirty.
+Actions dispatch state changes; `isDirty()` compares the current snapshot
+against the last-saved snapshot via deep equality.
 
-### 6.1 Deliverables
+### 1.5 Deliverables
 
-- [ ] Element registered as `sj-report-builder`
-- [ ] All child components composed and wired
-- [ ] Two-tier dirty state (panel + report level)
-- [ ] Actions menu with enable/disable logic
-- [ ] Save / load round-trip via `SanjayaDataClient`
-- [ ] `getReportDefinition()` method
-- [ ] `report-definition-change` event + callback
-- [ ] Tests: state coordination, dirty transitions, save flow, action dispatch
+- [x] Package scaffolded (Vite library mode, peer deps, tsconfig)
+- [x] `SanjayaClient` interface defined
+- [x] All TS types exported from entry point
+- [x] `SanjayaProvider` + `useSanjayaClient()` hook
+- [x] Reducer, actions, `isDirty()`, `extractSnapshot()`
+- [ ] Tests for state reducer and dirty tracking
 
 ---
 
-## Phase 7 — Integration, demo apps, and documentation
+## Phase 2 — `<DatasetPicker>`
 
-Phase 7 is broken into four sub-phases in a dedicated document:
-**[UI MVP Integration Plan](ui-mvp-integration-plan.md)**.
+### Behavior
 
-| Sub-phase | Deliverable |
-|-----------|-------------|
-| **7a** | Django host project + Northwind MSSQL dataset (real backend) |
-| **7b** | `<sj-data-grid>` component (AG Grid SSRM in Table + Pivot tabs) |
-| **7c** | Vanilla TypeScript reference app |
-| **7d** | React + MUI 7.2.0 integration app |
+- MUI `Autocomplete` fed by datasets (either pre-loaded via props or
+  fetched on mount via `client.listDatasets()`).
+- Searchable single-select. Each option shows the dataset label and
+  description.
+- Selecting a dataset calls `onChange(datasetKey)`. The parent
+  orchestrator handles column fetching and dependent state resets.
+
+### Props
+
+| Name | Type | Description |
+|------|------|-------------|
+| `value` | `string \| null` | Currently selected dataset key |
+| `onChange` | `(key: string \| null) => void` | Selection callback |
+| `datasets` | `Dataset[]` | Optional pre-loaded datasets (skip fetch) |
+| `disabled` | `boolean` | Disable the control |
+
+### 2.1 Deliverables
+
+- [x] `DatasetPicker` component
+- [x] Searchable dropdown with dataset description
+- [x] Supports both pre-loaded and fetched datasets
+- [ ] Tests: selection, search, loading state
+
+---
+
+## Phase 3 — `<ColumnSelector>`
+
+### Behavior
+
+- MUI checkbox list with columns grouped by `ColumnType`.
+- "Select All" / "Clear" buttons.
+- Shows selection count (`n / total`).
+- Selection drives AG Grid `columnDefs` and the export `selectedColumns`.
+
+### Props
+
+| Name | Type | Description |
+|------|------|-------------|
+| `columns` | `Column[]` | Full column metadata |
+| `selectedColumns` | `string[]` | Currently selected column names |
+| `onChange` | `(selected: string[]) => void` | Selection callback |
+| `disabled` | `boolean` | Disable all controls |
+
+### 3.1 Deliverables
+
+- [x] `ColumnSelector` component
+- [x] Grouped by column type with type labels
+- [x] Select all / clear
+- [ ] Tests: toggle, select all, clear
+
+---
+
+## Phase 4 — `<FilterBuilder>`
+
+### Behavior
+
+A recursive component that renders `FilterGroup` / `FilterCondition`
+trees using MUI form controls. This is the full "advanced mode" editor —
+nested groups with AND/OR combinators, per-condition NOT support, and
+operator-driven value inputs.
+
+#### Value input adaptation
+
+The value input adapts based on the column type and selected operator:
+
+| Condition | Input type |
+|-----------|-----------|
+| `filterStyle: "select"` with `enumValues` | MUI `Autocomplete` (single-select from enum values) |
+| `operator: "in"` | MUI `Autocomplete` (multi-select, free-form tags) |
+| `operator: "between"` | Two `TextField` inputs (From – To) |
+| `operator: "isNull"` / `"isNotNull"` | No value input |
+| Default | `TextField` |
+
+#### Group rendering
+
+Each group is a `Paper` with outlined variant and a colored left border
+(alternating colors by depth). Groups contain:
+- Combinator selector (AND / OR) — MUI `Select`
+- NOT chip (if negated)
+- Add condition / Add group / Remove group buttons
+- Nested conditions and sub-groups
+
+### Props
+
+| Name | Type | Description |
+|------|------|-------------|
+| `columns` | `Column[]` | Column metadata (drives operator lists, enum values) |
+| `filterGroup` | `FilterGroup` | Current filter tree |
+| `onChange` | `(fg: FilterGroup) => void` | Called on every change |
+| `disabled` | `boolean` | Disable all controls |
+
+### 4.1 Deliverables
+
+- [x] `FilterBuilder` component
+- [x] Recursive group rendering with AND/OR/NOT
+- [x] Operator-driven value input adaptation
+- [x] `filterStyle: "select"` renders enum dropdown
+- [x] `between` renders two inputs
+- [x] `in` renders tag input
+- [ ] Tests: add/remove conditions, nested groups, operator adaptation
+
+---
+
+## Phase 5 — `<PivotConfigurator>`
+
+### Behavior
+
+Three drop zones (plus an "Available Columns" pool) using HTML5 native
+drag-and-drop. No external DnD library required.
+
+| Zone | Purpose | Accepts | Maps to |
+|------|---------|---------|---------|
+| **Available** | Pool of unassigned columns | — | — |
+| **Row Groups** | Row-group dimensions | Any column | `rowGroupCols: ColumnVO[]` |
+| **Pivot Columns** | Cross-tab dimensions (pivot mode) | Any column | `pivotCols: ColumnVO[]` |
+| **Values** | Measures with agg function | Any column | `valueCols: ColumnVO[]` with `aggFunc` |
+
+- Drag from Available → any zone to add.
+- Drag between zones to move.
+- Click × on a chip to return it to Available.
+- Values zone shows an `aggFunc` dropdown per chip, constrained by the
+  column's `pivot.allowedAggs` (falls back to all agg funcs).
+- `hidePivotZone` prop hides the Pivot Columns zone (for datasets without
+  pivot capability).
+
+### Props
+
+| Name | Type | Description |
+|------|------|-------------|
+| `columns` | `Column[]` | Column metadata |
+| `rowGroupCols` | `ColumnVO[]` | Current row group columns |
+| `pivotCols` | `ColumnVO[]` | Current pivot columns |
+| `valueCols` | `ColumnVO[]` | Current value columns |
+| `onRowGroupColsChange` | `(cols) => void` | Row groups changed |
+| `onPivotColsChange` | `(cols) => void` | Pivot columns changed |
+| `onValueColsChange` | `(cols) => void` | Value columns changed |
+| `hidePivotZone` | `boolean` | Hide pivot zone for non-pivot datasets |
+| `disabled` | `boolean` | Disable all controls |
+
+### 5.1 Deliverables
+
+- [x] `PivotConfigurator` component
+- [x] HTML5 DnD between Available and three zones
+- [x] `aggFunc` picker constrained by `allowedAggs`
+- [x] Visual feedback on drag-over (dashed border, highlight)
+- [x] `hidePivotZone` support
+- [ ] Tests: drag between zones, agg selection, remove
+
+---
+
+## Phase 6 — `<DataGrid>` (AG Grid SSRM)
+
+### Behavior
+
+Wraps `<AgGridReact>` in SSRM mode. Implements a custom
+`IServerSideDatasource` that:
+
+1. Reads **structural** params from AG Grid (pagination, `groupKeys`,
+   `sortModel`).
+2. Injects **semantic** params from props (`filter`, `rowGroupCols`,
+   `valueCols`, `pivotCols`) — matching the pattern in
+   [ui-integration-notes.md](ui-integration-notes.md).
+3. Calls `client.tableQuery()` or `client.pivotQuery()` depending on
+   `activeTab`.
+4. Applies `secondaryColDefs` from pivot responses.
+5. Refreshes on dependency changes (`purge: true`).
+
+MUI `Tabs` toggle between Table and Pivot modes.
+
+### Props
+
+| Name | Type | Description |
+|------|------|-------------|
+| `datasetKey` | `string` | Active dataset |
+| `columns` | `Column[]` | Column metadata (→ ColDefs) |
+| `selectedColumns` | `string[]` | Visible columns |
+| `filterGroup` | `FilterGroup` | Active filter tree |
+| `rowGroupCols` | `ColumnVO[]` | Row group columns |
+| `pivotCols` | `ColumnVO[]` | Pivot columns |
+| `valueCols` | `ColumnVO[]` | Value columns |
+| `sortModel` | `SortModelItem[]` | Sort model |
+| `activeTab` | `"table" \| "pivot"` | Current tab |
+| `pivotCapable` | `boolean` | Show/hide pivot tab |
+| `onActiveTabChange` | `(tab) => void` | Tab change callback |
+| `onSortModelChange` | `(sort) => void` | Sort changed in grid |
+
+### 6.1 Deliverables
+
+- [x] `DataGrid` component
+- [x] SSRM datasource → `client.tableQuery()` / `client.pivotQuery()`
+- [x] Definition-driven column defs (selected columns, row groups, value aggs)
+- [x] Pivot `secondaryColDefs` applied from response
+- [x] Tab switching (Table / Pivot)
+- [x] Refresh on filter/column/sort/tab changes
+- [ ] Tests: datasource construction, col def mapping (mocked grid API)
+
+---
+
+## Phase 7 — `<ReportBuilder>` orchestrator
+
+### Responsibilities
+
+1. **Compose** all child components into a MUI layout:
+   - Persistent `Drawer` sidebar with dataset picker, column selector
+     (in an `Accordion`), filter builder (in an `Accordion`), and pivot
+     configurator (in an `Accordion`).
+   - Main content area with the `DataGrid`.
+   - `AppBar` toolbar with sidebar toggle, report title, dirty indicator,
+     save button, export button, favorite toggle, and actions overflow menu.
+
+2. **Manage state** via `useReducer(reportBuilderReducer, initialState)`.
+   Dataset changes reset dependent state. Column metadata loads trigger
+   auto-selection of all columns.
+
+3. **Dirty tracking**: `isDirty()` compares current state snapshot against
+   `lastSavedSnapshot`. The save button is disabled when clean.
+
+4. **Save / Load**: Save builds a `DynamicReportDefinition` from state and
+   calls `client.createReport()` or `client.updateReport()`. Load hydrates
+   the reducer from a `DynamicReport`'s `metadata.definition`, including
+   `rowGroupCols`, `pivotCols`, `valueCols`, and `sortModel`.
+
+5. **Actions menu** (MUI `Menu`): driven by `availableActions` from the
+   report response:
+
+   | Action | Behavior |
+   |--------|----------|
+   | Favorite | Toggle (separate star icon in toolbar) |
+   | Publish / Unpublish | `client.performAction()` |
+   | Archive / Restore | `client.performAction()` |
+   | Share | `client.performAction()` (dialog in future phase) |
+   | Transfer Ownership | `client.performAction()` |
+   | Delete | `client.performAction()` → `onDeleted()` callback |
+   | Export CSV / XLSX | `client.exportData()` with variant based on tab state |
+
+6. **Export variant selection**: based on current UI state:
+   - Table tab, no row groups → `flat` export
+   - Table tab, with row groups → `grouped` export
+   - Pivot tab → `pivot` export
+
+### Props
+
+| Name | Type | Description |
+|------|------|-------------|
+| `report` | `DynamicReport` | Report to load (edit mode); omit for new |
+| `onSaved` | `(report) => void` | Called after successful save |
+| `onDeleted` | `() => void` | Called after successful delete |
+| `sidebarWidth` | `number` | Sidebar width (default 320) |
+
+### 7.1 Deliverables
+
+- [x] `ReportBuilder` component
+- [x] All child components composed and wired
+- [x] `useReducer` state management with dirty tracking
+- [x] Save / load round-trip with `DynamicReportDefinition`
+- [x] Actions menu driven by `availableActions`
+- [x] Export with variant selection (flat / grouped / pivot)
+- [x] Favorite toggle in toolbar
+- [x] Collapsible sidebar
+- [x] Error banner and snackbar notifications
+- [ ] Tests: state coordination, dirty transitions, save flow, action dispatch
 
 ---
 
@@ -552,20 +489,26 @@ Phase 7 is broken into four sub-phases in a dedicated document:
 
 | Phase | Component | Key outcome |
 |-------|-----------|-------------|
-| **1** | Types + client + themes + utilities | Foundation: TS types, `SanjayaDataClient` interface, CSS theming, `DirtyTracker` |
-| **2** | `<sj-dataset-picker>` | Dataset selection with searchable dropdown |
-| **3** | `<sj-column-selector>` | Reorderable column list with isGroup toggle |
-| **4** | `<sj-filter-builder>` | Basic (flat AND) + Advanced (recursive groups) filter editing |
-| **5** | `<sj-pivot-config>` | Row / Column / Value zone builders with agg picker |
-| **6** | `<sj-report-builder>` | Orchestrator with two-tier dirty state + Actions menu |
-| **7** | [Integration + demos](ui-mvp-integration-plan.md) | Django host, `<sj-data-grid>`, vanilla TS app, React + MUI app |
+| **1** | Types + client + provider + state | Foundation: TS types, `SanjayaClient` interface, React context, reducer |
+| **2** | `<DatasetPicker>` | MUI Autocomplete dataset selection |
+| **3** | `<ColumnSelector>` | Checkbox list with type grouping |
+| **4** | `<FilterBuilder>` | Recursive FilterGroup tree editor with operator-driven inputs |
+| **5** | `<PivotConfigurator>` | HTML5 DnD zone builder for row groups / pivot / values |
+| **6** | `<DataGrid>` | AG Grid SSRM wrapper with Table + Pivot tabs |
+| **7** | `<ReportBuilder>` | Full orchestrator with sidebar, toolbar, save/load, actions |
+| **8** | [Demo app + integration](ui-mvp-integration-plan.md) | Demo React app with fetch-based SanjayaClient |
 
-Each phase is independently testable. Phases 2–5 can be developed in
-parallel once Phase 1 is complete.
+Phases 2–6 can be developed in parallel once Phase 1 is complete. Phase 7
+composes all prior work. Phase 8 is covered in the integration plan.
 
 ---
 
 ## Dependencies on backend changes
 
 Several features require additions to the backend API. These are detailed
-in [`backend-addenda.md`](backend-addenda.md).
+in [`backend-addenda.md`](backend-addenda.md):
+
+| Item | Status | Blocks |
+|------|--------|--------|
+| Pivot definition persistence (`rowGroupCols`, `pivotCols`, `valueCols`, `sortModel`) | ✅ Implemented in TypeSpec + OpenAPI | Phase 7 save/load |
+| Favorite action (`isFavorited`, `DynamicReportFavorite` model) | ✅ Implemented in TypeSpec + OpenAPI | Phase 7 actions menu |

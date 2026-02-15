@@ -1,52 +1,64 @@
 {
   "name": "@pojagi/sanjaya-ui",
   "version": "0.1.0",
+  "private": true,
   "type": "module",
-  "description": "Reusable web-component report builder for the Sanjaya dynamic reporting platform",
   "main": "./dist/index.js",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     },
-    "./themes/light.css": "./src/themes/light.css",
-    "./themes/dark.css": "./src/themes/dark.css"
-  },
-  "files": [
-    "dist",
-    "src/themes"
-  ],
-  "scripts": {
-    "build:templates": "build-templates ./src",
-    "build:ts": "tsc",
-    "build": "pnpm run build:templates && pnpm run build:ts",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "clean": "rm -rf dist"
-  },
-  "dependencies": {
-    "@atlaskit/pragmatic-drag-and-drop": "^1.0.0"
-  },
-  "peerDependencies": {
-    "ag-grid-enterprise": "^32.0.0"
-  },
-  "peerDependenciesMeta": {
-    "ag-grid-enterprise": {
-      "optional": true
+    "./types": {
+      "import": "./dist/api/types.js",
+      "types": "./dist/api/types.d.ts"
     }
   },
-  "devDependencies": {
-    "@pojagi/build-templates": "workspace:*",
-    "happy-dom": "^20.6.1",
-    "typescript": "^5.5.0",
-    "vitest": "^4.0.18"
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "generate:types": "openapi-typescript ../../api/tsp-output/@typespec/openapi3/openapi.yaml -o src/api/generated.ts",
+    "dev": "vite build --watch",
+    "build": "pnpm generate:types && tsc -b && vite build",
+    "clean": "rm -rf dist",
+    "lint": "eslint src/",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
-  "keywords": [
-    "web-components",
-    "report-builder",
-    "sanjaya",
-    "ag-grid",
-    "ssrm"
-  ]
+  "peerDependencies": {
+    "@mui/material": "^7.2.0",
+    "@mui/icons-material": "^7.2.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "ag-grid-community": "^32.0.0",
+    "ag-grid-enterprise": "^32.0.0",
+    "ag-grid-react": "^32.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@mui/material": "^7.2.0",
+    "@mui/icons-material": "^7.2.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@testing-library/react": "^16.0.0",
+    "@testing-library/jest-dom": "^6.0.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "ag-grid-community": "^32.0.0",
+    "ag-grid-enterprise": "^32.0.0",
+    "ag-grid-react": "^32.0.0",
+    "jsdom": "^25.0.0",
+    "openapi-typescript": "^7.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.5.0",
+    "vite": "^6.0.0",
+    "vite-plugin-dts": "^4.0.0",
+    "vitest": "^3.0.0"
+  }
 }
