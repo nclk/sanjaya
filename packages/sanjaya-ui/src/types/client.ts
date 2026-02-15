@@ -2,14 +2,14 @@
 // SanjayaDataClient — the interface the host application implements
 // ---------------------------------------------------------------------------
 
-import type { ColumnMeta } from "./columns.js";
-import type { DatasetSummary } from "./datasets.js";
+import type { ColumnMeta } from "./columns";
+import type { DatasetSummary } from "./datasets";
 import type {
   TableSSRMRequest,
   PivotSSRMRequest,
   SSRMResponse,
   ExportRequest,
-} from "./ssrm.js";
+} from "./ssrm";
 import type {
   DynamicReport,
   DynamicReportAction,
@@ -20,7 +20,7 @@ import type {
   ShareListResponse,
   UserShareRequest,
   GroupShareRequest,
-} from "./reports.js";
+} from "./reports";
 
 /**
  * Data-access interface injected into `<sj-report-builder>` by the

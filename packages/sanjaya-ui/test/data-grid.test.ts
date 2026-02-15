@@ -3,14 +3,14 @@
 // ---------------------------------------------------------------------------
 
 import { describe, it, expect, vi, afterEach } from "vitest";
-import type { SanjayaDataClient } from "../src/types/client.js";
-import type { DynamicReportDefinition } from "../src/types/reports.js";
-import { ColumnType, FilterCombinator, FilterOperator } from "../src/types/index.js";
-import type { ColumnMeta } from "../src/types/columns.js";
-import { AggFunc } from "../src/types/ssrm.js";
+import type { SanjayaDataClient } from "../src/types/client";
+import type { DynamicReportDefinition } from "../src/types/reports";
+import { ColumnType, FilterCombinator, FilterOperator } from "../src/types/index";
+import type { ColumnMeta } from "../src/types/columns";
+import { AggFunc } from "../src/types/ssrm";
 import "../src/data-grid/data-grid.js";
-import { SanjayaDataGrid } from "../src/data-grid/data-grid.js";
-import type { TabChangeDetail, GridReadyDetail } from "../src/data-grid/data-grid.js";
+import { SanjayaDataGrid } from "../src/data-grid/data-grid";
+import type { TabChangeDetail, GridReadyDetail } from "../src/data-grid/data-grid";
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -76,7 +76,6 @@ function mockGridApi() {
     setGridOption: vi.fn(),
     updateGridOptions: vi.fn(),
     refreshServerSide: vi.fn(),
-    setColumnDefs: vi.fn(),
     destroy: vi.fn(),
   };
 }
@@ -346,7 +345,9 @@ describe("<sj-data-grid> definition changes", () => {
       selectedColumns: ["order_id"],
     });
 
-    expect(api.setColumnDefs).toHaveBeenCalled();
+    expect(api.updateGridOptions).toHaveBeenCalledWith(
+      expect.objectContaining({ columnDefs: expect.any(Array) }),
+    );
     expect(api.refreshServerSide).toHaveBeenCalledWith({ purge: true });
   });
 

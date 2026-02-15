@@ -7,21 +7,21 @@
 // activation to avoid unnecessary AG Grid instantiation.
 // ---------------------------------------------------------------------------
 
-import type { SanjayaDataClient } from "../types/client.js";
-import type { ColumnMeta } from "../types/columns.js";
-import type { DynamicReportDefinition } from "../types/reports.js";
-import type { SSRMResponse } from "../types/ssrm.js";
-import { emit } from "../shared/events.js";
-import { template } from "./template.js";
+import type { SanjayaDataClient } from "../types/client";
+import type { ColumnMeta } from "../types/columns";
+import type { DynamicReportDefinition } from "../types/reports";
+import type { SSRMResponse } from "../types/ssrm";
+import { emit } from "../shared/events";
+import { template } from "./template";
 
-import type { GridColDef, SSRMGetRowsParams } from "./helpers.js";
+import type { GridColDef, SSRMGetRowsParams } from "./helpers";
 import {
   tableColDefs,
   pivotSecondaryColDefs,
   buildTableRequest,
   buildPivotRequest,
   isPivotReady,
-} from "./helpers.js";
+} from "./helpers";
 
 const tpl = document.createElement("template");
 tpl.innerHTML = template;
@@ -37,7 +37,6 @@ interface GridApi {
   setGridOption(key: string, value: unknown): void;
   updateGridOptions(opts: Record<string, unknown>): void;
   refreshServerSide(params?: { purge?: boolean }): void;
-  setColumnDefs(colDefs: GridColDef[]): void;
   destroy(): void;
 }
 
@@ -169,9 +168,29 @@ export class SanjayaDataGrid extends HTMLElement {
   }
 
   connectedCallback(): void {
+    this._ensureSlottedContainers();
     this._bindTabBar();
     this._syncTabs();
     this._updatePlaceholders();
+  }
+
+  /**
+   * Ensure grid container elements exist in the light DOM.
+   * If the host app didn't provide `<div slot="grid-table">` / `<div slot="grid-pivot">`,
+   * we create them automatically so the component works out of the box.
+   * Containers live in the light DOM so host-level CSS (including AG Grid themes) applies.
+   */
+  private _ensureSlottedContainers(): void {
+    if (!this.querySelector('[slot="grid-table"]')) {
+      const div = document.createElement("div");
+      div.slot = "grid-table";
+      this.appendChild(div);
+    }
+    if (!this.querySelector('[slot="grid-pivot"]')) {
+      const div = document.createElement("div");
+      div.slot = "grid-pivot";
+      this.appendChild(div);
+    }
   }
 
   disconnectedCallback(): void {
@@ -243,8 +262,9 @@ export class SanjayaDataGrid extends HTMLElement {
   private _updatePlaceholders(): void {
     const tablePH = this._shadow.getElementById("placeholder-table");
     const pivotPH = this._shadow.getElementById("placeholder-pivot");
-    const tableGrid = this._shadow.getElementById("grid-table");
-    const pivotGrid = this._shadow.getElementById("grid-pivot");
+    // Grid containers live in the light DOM (slotted)
+    const tableGrid = this.querySelector<HTMLElement>('[slot="grid-table"]');
+    const pivotGrid = this.querySelector<HTMLElement>('[slot="grid-pivot"]');
 
     const hasDataset = !!this._datasetKey;
     const hasPivot = isPivotReady(this._definition);
@@ -257,8 +277,11 @@ export class SanjayaDataGrid extends HTMLElement {
         : "Select a dataset to view data";
     }
     if (tableGrid) {
-      tableGrid.style.display =
-        hasDataset && this._tableInitialized ? "block" : "none";
+      if (hasDataset && this._tableInitialized) {
+        tableGrid.setAttribute("data-grid-visible", "");
+      } else {
+        tableGrid.removeAttribute("data-grid-visible");
+      }
     }
     if (pivotPH) {
       pivotPH.style.display =
@@ -268,8 +291,11 @@ export class SanjayaDataGrid extends HTMLElement {
         : "Configure pivot settings to view data";
     }
     if (pivotGrid) {
-      pivotGrid.style.display =
-        hasPivot && this._pivotInitialized ? "block" : "none";
+      if (hasPivot && this._pivotInitialized) {
+        pivotGrid.setAttribute("data-grid-visible", "");
+      } else {
+        pivotGrid.removeAttribute("data-grid-visible");
+      }
     }
   }
 
@@ -308,7 +334,7 @@ export class SanjayaDataGrid extends HTMLElement {
   }
 
   private _initTableGrid(factory: CreateGridFn): void {
-    const container = this._shadow.getElementById("grid-table");
+    const container = this.querySelector<HTMLElement>('[slot="grid-table"]');
     if (!container) return;
 
     const colDefs = this._definition
@@ -335,6 +361,7 @@ export class SanjayaDataGrid extends HTMLElement {
       },
       animateRows: false,
       suppressAggFuncInHeader: true,
+      rowGroupPanelShow: "never",
     });
 
     this._tableApi = api;
@@ -344,7 +371,7 @@ export class SanjayaDataGrid extends HTMLElement {
   }
 
   private _initPivotGrid(factory: CreateGridFn): void {
-    const container = this._shadow.getElementById("grid-pivot");
+    const container = this.querySelector<HTMLElement>('[slot="grid-pivot"]');
     if (!container) return;
     if (!this._definition) return;
 
@@ -365,6 +392,7 @@ export class SanjayaDataGrid extends HTMLElement {
       },
       animateRows: false,
       suppressAggFuncInHeader: false,
+      rowGroupPanelShow: "never",
     });
 
     this._pivotApi = api;
@@ -467,7 +495,7 @@ export class SanjayaDataGrid extends HTMLElement {
     // Table: update column defs + refresh data
     if (this._tableApi && this._columnsMeta.length > 0) {
       const newColDefs = tableColDefs(next, this._columnsMeta);
-      this._tableApi.setColumnDefs(newColDefs);
+      this._tableApi.updateGridOptions({ columnDefs: newColDefs });
       this._tableApi.refreshServerSide({ purge: true });
     }
 

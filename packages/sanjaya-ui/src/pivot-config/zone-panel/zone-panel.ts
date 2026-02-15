@@ -8,13 +8,13 @@
 // The Values variant also renders an AggFunc dropdown per item.
 // ---------------------------------------------------------------------------
 
-import type { ColumnMeta } from "../../types/columns.js";
-import type { ColumnVO } from "../../types/ssrm.js";
-import { AggFunc } from "../../types/ssrm.js";
-import { emit } from "../../shared/events.js";
-import { template } from "./template.js";
-import type { PivotZone } from "../helpers.js";
-import { AGG_LABELS } from "../helpers.js";
+import type { ColumnMeta } from "../../types/columns";
+import type { ColumnVO } from "../../types/ssrm";
+import { AggFunc } from "../../types/ssrm";
+import { emit } from "../../shared/events";
+import { template } from "./template";
+import type { PivotZone } from "../helpers";
+import { AGG_LABELS } from "../helpers";
 
 const tpl = document.createElement("template");
 tpl.innerHTML = template;

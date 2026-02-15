@@ -2,13 +2,13 @@
 // Filter-builder shared types, constants, and pure helper functions
 // ---------------------------------------------------------------------------
 
-import type { ColumnMeta } from "../types/columns.js";
-import { ColumnType } from "../types/columns.js";
+import type { ColumnMeta } from "../types/columns";
+import { ColumnType } from "../types/columns";
 import {
   FilterOperator,
   FilterCombinator,
-} from "../types/filters.js";
-import type { FilterCondition, FilterGroup } from "../types/filters.js";
+} from "../types/filters";
+import type { FilterCondition, FilterGroup } from "../types/filters";
 
 // ---------------------------------------------------------------------------
 // Types

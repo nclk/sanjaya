@@ -3,25 +3,25 @@
 // ---------------------------------------------------------------------------
 
 import { describe, it, expect, vi, afterEach } from "vitest";
-import type { SanjayaDataClient } from "../src/types/client.js";
-import type { ColumnMeta } from "../src/types/columns.js";
-import { ColumnType } from "../src/types/columns.js";
-import { AggFunc } from "../src/types/ssrm.js";
-import type { ColumnVO } from "../src/types/ssrm.js";
-import { FilterOperator } from "../src/types/filters.js";
-import type { PivotConfig } from "../src/pivot-config/helpers.js";
-import { emptyPivotConfig } from "../src/pivot-config/helpers.js";
-import type { PivotConfigChangeDetail } from "../src/pivot-config/pivot-config.js";
+import type { SanjayaDataClient } from "../src/types/client";
+import type { ColumnMeta } from "../src/types/columns";
+import { ColumnType } from "../src/types/columns";
+import { AggFunc } from "../src/types/ssrm";
+import type { ColumnVO } from "../src/types/ssrm";
+import { FilterOperator } from "../src/types/filters";
+import type { PivotConfig } from "../src/pivot-config/helpers";
+import { emptyPivotConfig } from "../src/pivot-config/helpers";
+import type { PivotConfigChangeDetail } from "../src/pivot-config/pivot-config";
 import type {
   ZoneAddDetail,
   ZoneRemoveDetail,
   ZoneReorderDetail,
   ZoneAggChangeDetail,
-} from "../src/pivot-config/zone-panel/zone-panel.js";
+} from "../src/pivot-config/zone-panel/zone-panel";
 
 import "../src/pivot-config/pivot-config.js";
-import { SanjayaPivotConfig } from "../src/pivot-config/pivot-config.js";
-import { SanjayaPivotZone } from "../src/pivot-config/zone-panel/zone-panel.js";
+import { SanjayaPivotConfig } from "../src/pivot-config/pivot-config";
+import { SanjayaPivotZone } from "../src/pivot-config/zone-panel/zone-panel";
 
 // ---------------------------------------------------------------------------
 // Fixtures

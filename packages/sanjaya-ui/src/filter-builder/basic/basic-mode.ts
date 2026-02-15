@@ -1,21 +1,25 @@
 // ---------------------------------------------------------------------------
 // <sj-filter-basic> — flat AND condition list with "ALL" pseudo-operator
+//
+// Shows one row per available column. The "ALL" pseudo-operator means
+// "no filter on this column" and is excluded from the emitted FilterGroup.
+// An "Active only" toggle hides inactive (ALL) rows.
 // ---------------------------------------------------------------------------
 
-import type { ColumnMeta } from "../../types/columns.js";
-import { FilterOperator, FilterStyle } from "../../types/filters.js";
-import type { FilterGroup } from "../../types/filters.js";
-import { emit } from "../../shared/events.js";
-import { template } from "./template.js";
-import type { BasicRow } from "../helpers.js";
+import type { ColumnMeta } from "../../types/columns";
+import { FilterOperator, FilterStyle } from "../../types/filters";
+import type { FilterGroup } from "../../types/filters";
+import { emit } from "../../shared/events";
+import { template } from "./template";
+import type { BasicRow } from "../helpers";
 import {
   OPERATOR_LABELS,
   emptyBasicRow,
   basicRowsToFilterGroup,
   filterGroupToBasicRows,
   isBasicCompatible,
-} from "../helpers.js";
-import { renderValueWidget, readValueFromRow } from "../value-widgets.js";
+} from "../helpers";
+import { renderValueWidget, readValueFromRow } from "../value-widgets";
 
 const tpl = document.createElement("template");
 tpl.innerHTML = template;
@@ -27,9 +31,9 @@ tpl.innerHTML = template;
 /**
  * `<sj-filter-basic>` — flat AND condition list.
  *
- * Each row is a column + operator + value widget. The "ALL" pseudo-operator
- * means "no filter on this column" and is excluded from the emitted
- * FilterGroup.
+ * Each row corresponds to a column and has an operator + value widget.
+ * The "ALL" pseudo-operator means "no filter on this column" and is
+ * excluded from the emitted FilterGroup.
  *
  * @fires filter-dirty — Emitted whenever the working state changes.
  *        `event.detail` is the current `FilterGroup`.
@@ -53,16 +57,31 @@ export class SanjayaFilterBasic extends HTMLElement {
     return basicRowsToFilterGroup(this._rows);
   }
 
+  /** Whether only active (non-ALL) rows are shown. */
+  get activeOnly(): boolean {
+    return this._activeOnly;
+  }
+
+  set activeOnly(value: boolean) {
+    if (value === this._activeOnly) return;
+    this._activeOnly = value;
+    this._toggleActiveOnly.checked = value;
+    this.render();
+  }
+
   // ----- Internal state ---------------------------------------------------
 
   private _columns: ColumnMeta[] = [];
   private _rows: BasicRow[] = [];
+  private _activeOnly = false;
 
   // Shadow DOM refs
   private _root: ShadowRoot;
   private _conditionsEl: HTMLElement;
-  private _btnAdd: HTMLButtonElement;
   private _conditionRowTpl: HTMLTemplateElement;
+  private _toggleActiveOnly: HTMLInputElement;
+  private _activeCountEl: HTMLElement;
+  private _emptyStateEl: HTMLElement;
 
   // -----------------------------------------------------------------------
   // Lifecycle
@@ -74,26 +93,26 @@ export class SanjayaFilterBasic extends HTMLElement {
     this._root.appendChild(tpl.content.cloneNode(true));
 
     this._conditionsEl = this._root.getElementById("conditions")!;
-    this._btnAdd = this._root.getElementById(
-      "btn-add-condition",
-    ) as HTMLButtonElement;
     this._conditionRowTpl = this._root.getElementById(
       "condition-row-tpl",
     ) as HTMLTemplateElement;
+    this._toggleActiveOnly = this._root.getElementById(
+      "toggle-active-only",
+    ) as HTMLInputElement;
+    this._activeCountEl = this._root.getElementById("active-count")!;
+    this._emptyStateEl = this._root.getElementById("empty-state")!;
   }
 
   connectedCallback(): void {
-    this._btnAdd.addEventListener("click", this._onAddCondition);
+    this._toggleActiveOnly.addEventListener("change", this._onToggleActiveOnly);
     this._conditionsEl.addEventListener("change", this._onChange);
     this._conditionsEl.addEventListener("input", this._onInput);
-    this._conditionsEl.addEventListener("click", this._onClick);
   }
 
   disconnectedCallback(): void {
-    this._btnAdd.removeEventListener("click", this._onAddCondition);
+    this._toggleActiveOnly.removeEventListener("change", this._onToggleActiveOnly);
     this._conditionsEl.removeEventListener("change", this._onChange);
     this._conditionsEl.removeEventListener("input", this._onInput);
-    this._conditionsEl.removeEventListener("click", this._onClick);
   }
 
   // -----------------------------------------------------------------------
@@ -102,18 +121,11 @@ export class SanjayaFilterBasic extends HTMLElement {
 
   /**
    * Load a FilterGroup into basic mode. If the group is not
-   * basic-compatible (e.g. OR, nested groups), reset to a single ALL row.
+   * basic-compatible (e.g. OR, nested groups), reset to all-ALL rows.
    */
   loadFilterGroup(group: FilterGroup): void {
     if (isBasicCompatible(group) && this._columns.length > 0) {
       this._rows = filterGroupToBasicRows(group, this._columns);
-      // Drop rows for columns that no longer exist
-      this._rows = this._rows.filter((r) =>
-        this._columns.some((c) => c.name === r.column),
-      );
-      if (this._rows.length === 0) {
-        this._rows = [emptyBasicRow(this._columns[0].name)];
-      }
     } else {
       this._initRows();
     }
@@ -122,11 +134,24 @@ export class SanjayaFilterBasic extends HTMLElement {
 
   /** Re-render from current internal state. */
   render(): void {
+    const activeCount = this._rows.filter((r) => r.operator !== "ALL").length;
+    this._activeCountEl.textContent =
+      activeCount > 0 ? `${activeCount} active` : "";
+
+    const visibleRows = this._activeOnly
+      ? this._rows.filter((r) => r.operator !== "ALL")
+      : this._rows;
+
     this._conditionsEl.innerHTML = "";
-    for (let i = 0; i < this._rows.length; i++) {
-      const rowEl = this._createConditionRow(this._rows[i], i);
+    for (const row of visibleRows) {
+      // Find the original index in _rows (needed for change events)
+      const index = this._rows.indexOf(row);
+      const rowEl = this._createConditionRow(row, index);
       this._conditionsEl.appendChild(rowEl);
     }
+
+    // Empty state when filtering shows nothing
+    this._emptyStateEl.hidden = !(this._activeOnly && visibleRows.length === 0);
   }
 
   // -----------------------------------------------------------------------
@@ -134,10 +159,7 @@ export class SanjayaFilterBasic extends HTMLElement {
   // -----------------------------------------------------------------------
 
   private _initRows(): void {
-    this._rows =
-      this._columns.length > 0
-        ? [emptyBasicRow(this._columns[0].name)]
-        : [];
+    this._rows = this._columns.map((col) => emptyBasicRow(col.name));
   }
 
   // -----------------------------------------------------------------------
@@ -151,21 +173,15 @@ export class SanjayaFilterBasic extends HTMLElement {
       ) as HTMLElement;
     el.dataset.index = String(index);
 
-    const colSelect = el.querySelector(".col-select") as HTMLSelectElement;
+    const colLabel = el.querySelector(".col-label") as HTMLElement;
     const opSelect = el.querySelector(".op-select") as HTMLSelectElement;
     const valueContainer = el.querySelector(".value-input") as HTMLElement;
 
-    // Populate column dropdown
-    for (const col of this._columns) {
-      const opt = document.createElement("option");
-      opt.value = col.name;
-      opt.textContent = col.label;
-      colSelect.appendChild(opt);
-    }
-    colSelect.value = row.column;
+    // Set column label
+    const colMeta = this._columns.find((c) => c.name === row.column);
+    colLabel.textContent = colMeta?.label ?? row.column;
 
     // Populate operator dropdown
-    const colMeta = this._columns.find((c) => c.name === row.column);
     this._populateOperators(opSelect, colMeta, row.operator);
 
     // Value widget
@@ -216,16 +232,19 @@ export class SanjayaFilterBasic extends HTMLElement {
   private _readRows(): void {
     const rowEls =
       this._conditionsEl.querySelectorAll<HTMLElement>(".condition-row");
-    this._rows = [];
 
     for (const rowEl of rowEls) {
-      const colSelect = rowEl.querySelector(".col-select") as HTMLSelectElement;
+      const idx = parseInt(rowEl.dataset.index!, 10);
       const opSelect = rowEl.querySelector(".op-select") as HTMLSelectElement;
-      const column = colSelect.value;
       const operator = opSelect.value;
 
       const { value, valueTo } = readValueFromRow(rowEl, operator);
-      this._rows.push({ column, operator, value, valueTo });
+      this._rows[idx] = {
+        ...this._rows[idx],
+        operator,
+        value,
+        valueTo,
+      };
     }
   }
 
@@ -241,11 +260,9 @@ export class SanjayaFilterBasic extends HTMLElement {
   // Event handlers
   // -----------------------------------------------------------------------
 
-  private _onAddCondition = (): void => {
-    if (this._columns.length === 0) return;
-    this._rows.push(emptyBasicRow(this._columns[0].name));
+  private _onToggleActiveOnly = (): void => {
+    this._activeOnly = this._toggleActiveOnly.checked;
     this.render();
-    this._emitDirty();
   };
 
   private _onChange = (e: Event): void => {
@@ -256,14 +273,7 @@ export class SanjayaFilterBasic extends HTMLElement {
     const row = this._rows[idx];
     if (!row) return;
 
-    if (target.classList.contains("col-select")) {
-      row.column = (target as HTMLSelectElement).value;
-      row.operator = "ALL";
-      row.value = undefined;
-      row.valueTo = undefined;
-      this.render();
-      this._emitDirty();
-    } else if (target.classList.contains("op-select")) {
+    if (target.classList.contains("op-select")) {
       row.operator = (target as HTMLSelectElement).value;
       row.value = undefined;
       row.valueTo = undefined;
@@ -288,19 +298,6 @@ export class SanjayaFilterBasic extends HTMLElement {
       this._readRows();
       this._emitDirty();
     }
-  };
-
-  private _onClick = (e: Event): void => {
-    const target = e.target as HTMLElement;
-    const removeBtn = target.closest<HTMLElement>(".remove-condition");
-    if (!removeBtn) return;
-
-    const rowEl = removeBtn.closest<HTMLElement>(".condition-row");
-    if (!rowEl?.dataset.index) return;
-    const idx = parseInt(rowEl.dataset.index, 10);
-    this._rows.splice(idx, 1);
-    this.render();
-    this._emitDirty();
   };
 }
 

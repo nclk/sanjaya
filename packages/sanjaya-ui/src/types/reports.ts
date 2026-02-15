@@ -2,8 +2,8 @@
 // Report types — mirror sanjaya_django.schemas.reports + TypeSpec models
 // ---------------------------------------------------------------------------
 
-import type { FilterGroup } from "./filters.js";
-import type { ColumnVO, SortModelItem } from "./ssrm.js";
+import type { FilterGroup } from "./filters";
+import type { ColumnVO, SortModelItem } from "./ssrm";
 
 // ---------------------------------------------------------------------------
 // Enums

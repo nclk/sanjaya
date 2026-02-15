@@ -3,10 +3,10 @@
 // ---------------------------------------------------------------------------
 
 import { describe, it, expect } from "vitest";
-import { ColumnType } from "../src/types/columns.js";
-import type { ColumnMeta } from "../src/types/columns.js";
-import { FilterOperator, FilterCombinator } from "../src/types/filters.js";
-import type { FilterGroup } from "../src/types/filters.js";
+import { ColumnType } from "../src/types/columns";
+import type { ColumnMeta } from "../src/types/columns";
+import { FilterOperator, FilterCombinator } from "../src/types/filters";
+import type { FilterGroup } from "../src/types/filters";
 import {
   emptyBasicRow,
   basicRowsToFilterGroup,
@@ -15,8 +15,8 @@ import {
   inputTypeForColumn,
   OPERATOR_LABELS,
   NULL_OPERATORS,
-} from "../src/filter-builder/helpers.js";
-import type { BasicRow } from "../src/filter-builder/helpers.js";
+} from "../src/filter-builder/helpers";
+import type { BasicRow } from "../src/filter-builder/helpers";
 
 // ---------------------------------------------------------------------------
 // Fixtures

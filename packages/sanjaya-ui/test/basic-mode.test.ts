@@ -3,17 +3,17 @@
 // ---------------------------------------------------------------------------
 
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { ColumnType } from "../src/types/columns.js";
-import type { ColumnMeta } from "../src/types/columns.js";
+import { ColumnType } from "../src/types/columns";
+import type { ColumnMeta } from "../src/types/columns";
 import {
   FilterOperator,
   FilterCombinator,
   FilterStyle,
-} from "../src/types/filters.js";
-import type { FilterGroup } from "../src/types/filters.js";
+} from "../src/types/filters";
+import type { FilterGroup } from "../src/types/filters";
 
-import "../src/filter-builder/basic/basic-mode.js";
-import { SanjayaFilterBasic } from "../src/filter-builder/basic/basic-mode.js";
+import "../src/filter-builder/basic/basic-mode";
+import { SanjayaFilterBasic } from "../src/filter-builder/basic/basic-mode";
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -99,8 +99,8 @@ function getRows(el: SanjayaFilterBasic): HTMLElement[] {
   );
 }
 
-function colSelect(row: HTMLElement): HTMLSelectElement {
-  return row.querySelector(".col-select") as HTMLSelectElement;
+function colLabel(row: HTMLElement): string {
+  return (row.querySelector(".col-label") as HTMLElement).textContent ?? "";
 }
 
 function opSelect(row: HTMLElement): HTMLSelectElement {
@@ -111,10 +111,18 @@ function valueField(row: HTMLElement): HTMLInputElement | null {
   return row.querySelector(".value-field") as HTMLInputElement | null;
 }
 
-function addBtn(el: SanjayaFilterBasic): HTMLButtonElement {
+function toggleActiveOnly(el: SanjayaFilterBasic): HTMLInputElement {
   return el.shadowRoot!.getElementById(
-    "btn-add-condition",
-  ) as HTMLButtonElement;
+    "toggle-active-only",
+  ) as HTMLInputElement;
+}
+
+function activeCountText(el: SanjayaFilterBasic): string {
+  return el.shadowRoot!.getElementById("active-count")!.textContent ?? "";
+}
+
+function emptyState(el: SanjayaFilterBasic): HTMLElement {
+  return el.shadowRoot!.getElementById("empty-state")!;
 }
 
 function selectValue(select: HTMLSelectElement, value: string): void {
@@ -139,37 +147,31 @@ describe("sj-filter-basic", () => {
   // --- Rendering ---------------------------------------------------------
 
   describe("rendering", () => {
-    it("renders one default condition row", () => {
+    it("renders one row per column", () => {
       const el = create();
-      expect(getRows(el)).toHaveLength(1);
+      expect(getRows(el)).toHaveLength(COLUMNS.length);
     });
 
-    it("column dropdown contains all columns", () => {
+    it("each row shows the column label", () => {
       const el = create();
-      const opts = Array.from(colSelect(getRows(el)[0]).options).map(
-        (o) => o.value,
-      );
-      expect(opts).toEqual([
-        "year",
-        "region",
-        "amount",
-        "active",
-        "start_date",
-      ]);
+      const labels = getRows(el).map(colLabel);
+      expect(labels).toEqual(["Year", "Region", "Amount", "Active", "Start Date"]);
     });
 
-    it("operator dropdown defaults to ALL", () => {
+    it("operator dropdown defaults to ALL for every row", () => {
       const el = create();
-      expect(opSelect(getRows(el)[0]).value).toBe("ALL");
+      for (const row of getRows(el)) {
+        expect(opSelect(row).value).toBe("ALL");
+      }
     });
 
     it("operator dropdown shows column-specific operators", () => {
       const el = create();
-      const ops = Array.from(opSelect(getRows(el)[0]).options).map(
+      const yearOps = Array.from(opSelect(getRows(el)[0]).options).map(
         (o) => o.value,
       );
       // year: ALL + eq, gt, lt, between
-      expect(ops).toEqual(["ALL", "eq", "gt", "lt", "between"]);
+      expect(yearOps).toEqual(["ALL", "eq", "gt", "lt", "between"]);
     });
 
     it("renders nothing when columns are empty", () => {
@@ -177,11 +179,10 @@ describe("sj-filter-basic", () => {
       expect(getRows(el)).toHaveLength(0);
     });
 
-    it("region column shows only ALL and 'is one of' (filterStyle select)", () => {
+    it("region row shows only ALL and 'is one of' (filterStyle select)", () => {
       const el = create();
-      selectValue(colSelect(getRows(el)[0]), "region");
-      const rows = getRows(el);
-      const ops = Array.from(opSelect(rows[0]).options).map(
+      const regionRow = getRows(el)[1]; // region is 2nd column
+      const ops = Array.from(opSelect(regionRow).options).map(
         (o) => o.value,
       );
       expect(ops).toEqual(["ALL", "in"]);
@@ -206,9 +207,10 @@ describe("sj-filter-basic", () => {
 
     it("shows no value for isNull", () => {
       const el = create();
-      selectValue(colSelect(getRows(el)[0]), "start_date");
-      selectValue(opSelect(getRows(el)[0]), "isNull");
-      expect(valueField(getRows(el)[0])).toBeNull();
+      const dateRow = getRows(el)[4]; // start_date is 5th column
+      selectValue(opSelect(dateRow), "isNull");
+      const updatedDateRow = getRows(el)[4];
+      expect(valueField(updatedDateRow)).toBeNull();
     });
 
     it("shows two inputs for between", () => {
@@ -221,17 +223,17 @@ describe("sj-filter-basic", () => {
 
     it("shows multi-select for filterStyle:select column", () => {
       const el = create();
-      selectValue(colSelect(getRows(el)[0]), "region");
-      selectValue(opSelect(getRows(el)[0]), "in");
-      const checks = getRows(el)[0].querySelectorAll(".multi-check");
+      const regionRow = getRows(el)[1];
+      selectValue(opSelect(regionRow), "in");
+      const checks = getRows(el)[1].querySelectorAll(".multi-check");
       expect(checks).toHaveLength(4);
     });
 
     it("shows boolean toggle for boolean column", () => {
       const el = create();
-      selectValue(colSelect(getRows(el)[0]), "active");
-      selectValue(opSelect(getRows(el)[0]), "eq");
-      const cb = getRows(el)[0].querySelector(
+      const activeRow = getRows(el)[3]; // active is 4th column
+      selectValue(opSelect(activeRow), "eq");
+      const cb = getRows(el)[3].querySelector(
         ".value-bool",
       ) as HTMLInputElement;
       expect(cb).not.toBeNull();
@@ -240,48 +242,82 @@ describe("sj-filter-basic", () => {
 
     it("shows date input for date column", () => {
       const el = create();
-      selectValue(colSelect(getRows(el)[0]), "start_date");
-      selectValue(opSelect(getRows(el)[0]), "eq");
-      const inp = valueField(getRows(el)[0]);
+      const dateRow = getRows(el)[4];
+      selectValue(opSelect(dateRow), "eq");
+      const inp = valueField(getRows(el)[4]);
       expect(inp).not.toBeNull();
       expect(inp!.type).toBe("date");
     });
-
-    it("updates operator list when column changes", () => {
-      const el = create();
-      selectValue(colSelect(getRows(el)[0]), "active");
-      const ops = Array.from(opSelect(getRows(el)[0]).options).map(
-        (o) => o.value,
-      );
-      expect(ops).toEqual(["ALL", "eq"]);
-    });
   });
 
-  // --- Add / remove conditions -------------------------------------------
+  // --- Active-only toggle ------------------------------------------------
 
-  describe("add and remove conditions", () => {
-    it("adds a condition row", () => {
+  describe("active-only toggle", () => {
+    it("shows all rows by default", () => {
       const el = create();
-      addBtn(el).click();
-      expect(getRows(el)).toHaveLength(2);
+      expect(getRows(el)).toHaveLength(5);
+      expect(toggleActiveOnly(el).checked).toBe(false);
     });
 
-    it("removes a condition row", () => {
+    it("hides inactive rows when toggled on", () => {
       const el = create();
-      addBtn(el).click();
-      const btn = getRows(el)[0].querySelector(
-        ".remove-condition",
-      ) as HTMLButtonElement;
-      btn.click();
+      // Activate one filter
+      selectValue(opSelect(getRows(el)[0]), "gt");
+      typeValue(valueField(getRows(el)[0])!, "2020");
+
+      // Toggle active only
+      toggleActiveOnly(el).checked = true;
+      toggleActiveOnly(el).dispatchEvent(new Event("change"));
+
+      const rows = getRows(el);
+      expect(rows).toHaveLength(1);
+      expect(colLabel(rows[0])).toBe("Year");
+    });
+
+    it("shows empty state when active-only is on and no filters active", () => {
+      const el = create();
+      toggleActiveOnly(el).checked = true;
+      toggleActiveOnly(el).dispatchEvent(new Event("change"));
+
+      expect(getRows(el)).toHaveLength(0);
+      expect(emptyState(el).hidden).toBe(false);
+    });
+
+    it("hides empty state when not in active-only mode", () => {
+      const el = create();
+      expect(emptyState(el).hidden).toBe(true);
+    });
+
+    it("shows all rows again when toggled off", () => {
+      const el = create();
+      selectValue(opSelect(getRows(el)[0]), "gt");
+
+      // Toggle on
+      toggleActiveOnly(el).checked = true;
+      toggleActiveOnly(el).dispatchEvent(new Event("change"));
       expect(getRows(el)).toHaveLength(1);
+
+      // Toggle off
+      toggleActiveOnly(el).checked = false;
+      toggleActiveOnly(el).dispatchEvent(new Event("change"));
+      expect(getRows(el)).toHaveLength(5);
     });
 
-    it("can remove all rows", () => {
+    it("displays active count", () => {
       const el = create();
-      const btn = getRows(el)[0].querySelector(
-        ".remove-condition",
-      ) as HTMLButtonElement;
-      btn.click();
+      expect(activeCountText(el)).toBe("");
+
+      selectValue(opSelect(getRows(el)[0]), "gt");
+      expect(activeCountText(el)).toBe("1 active");
+
+      selectValue(opSelect(getRows(el)[2]), "gte");
+      expect(activeCountText(el)).toBe("2 active");
+    });
+
+    it("can be set programmatically", () => {
+      const el = create();
+      el.activeOnly = true;
+      expect(toggleActiveOnly(el).checked).toBe(true);
       expect(getRows(el)).toHaveLength(0);
     });
   });
@@ -306,26 +342,6 @@ describe("sj-filter-basic", () => {
       expect(handler).toHaveBeenCalledOnce();
     });
 
-    it("emits on add condition", () => {
-      const el = create();
-      const handler = vi.fn();
-      el.addEventListener("filter-dirty", handler);
-      addBtn(el).click();
-      expect(handler).toHaveBeenCalledOnce();
-    });
-
-    it("emits on remove condition", () => {
-      const el = create();
-      addBtn(el).click();
-      const handler = vi.fn();
-      el.addEventListener("filter-dirty", handler);
-      const btn = getRows(el)[0].querySelector(
-        ".remove-condition",
-      ) as HTMLButtonElement;
-      btn.click();
-      expect(handler).toHaveBeenCalledOnce();
-    });
-
     it("detail is a FilterGroup", () => {
       const el = create();
       const handler = vi.fn();
@@ -344,16 +360,15 @@ describe("sj-filter-basic", () => {
 
     it("ALL conditions excluded from emitted FilterGroup", () => {
       const el = create();
-      addBtn(el).click();
-      // Row 0 stays ALL; row 1: set gt + value
-      selectValue(colSelect(getRows(el)[1]), "amount");
-      selectValue(opSelect(getRows(el)[1]), "gt");
+      // Set one filter on amount (3rd row, index 2)
+      selectValue(opSelect(getRows(el)[2]), "gt");
       const handler = vi.fn();
       el.addEventListener("filter-dirty", handler);
-      typeValue(valueField(getRows(el)[1])!, "100");
+      typeValue(valueField(getRows(el)[2])!, "100");
       const detail = (
         handler.mock.calls[0][0] as CustomEvent<FilterGroup>
       ).detail;
+      // Only the amount condition should be in the group
       expect(detail.conditions).toHaveLength(1);
       expect(detail.conditions![0].column).toBe("amount");
     });
@@ -379,9 +394,9 @@ describe("sj-filter-basic", () => {
 
     it("multi-select produces array value", () => {
       const el = create();
-      selectValue(colSelect(getRows(el)[0]), "region");
-      selectValue(opSelect(getRows(el)[0]), "in");
-      const checks = getRows(el)[0].querySelectorAll<HTMLInputElement>(
+      const regionRow = getRows(el)[1];
+      selectValue(opSelect(regionRow), "in");
+      const checks = getRows(el)[1].querySelectorAll<HTMLInputElement>(
         ".multi-check",
       );
       const handler = vi.fn();
@@ -428,11 +443,12 @@ describe("sj-filter-basic", () => {
         groups: [],
       });
       const rows = getRows(el);
-      const yearRow = rows.find(
-        (r) => colSelect(r).value === "year",
-      );
-      expect(yearRow).toBeDefined();
-      expect(opSelect(yearRow!).value).toBe("gt");
+      // Still shows all columns
+      expect(rows).toHaveLength(5);
+      // Year row should have gt operator
+      expect(opSelect(rows[0]).value).toBe("gt");
+      // Other rows should still be ALL
+      expect(opSelect(rows[1]).value).toBe("ALL");
     });
 
     it("resets to ALL rows for incompatible (OR) FilterGroup", () => {
@@ -445,8 +461,10 @@ describe("sj-filter-basic", () => {
         groups: [],
       });
       const rows = getRows(el);
-      expect(rows).toHaveLength(1);
-      expect(opSelect(rows[0]).value).toBe("ALL");
+      expect(rows).toHaveLength(5);
+      for (const row of rows) {
+        expect(opSelect(row).value).toBe("ALL");
+      }
     });
 
     it("resets to ALL rows for incompatible (nested groups) FilterGroup", () => {
@@ -463,8 +481,10 @@ describe("sj-filter-basic", () => {
         ],
       });
       const rows = getRows(el);
-      expect(rows).toHaveLength(1);
-      expect(opSelect(rows[0]).value).toBe("ALL");
+      expect(rows).toHaveLength(5);
+      for (const row of rows) {
+        expect(opSelect(row).value).toBe("ALL");
+      }
     });
   });
 
@@ -475,12 +495,12 @@ describe("sj-filter-basic", () => {
       const el = create();
       const spy = vi.spyOn(
         el.shadowRoot!.getElementById(
-          "btn-add-condition",
-        ) as HTMLButtonElement,
+          "toggle-active-only",
+        ) as HTMLInputElement,
         "removeEventListener",
       );
       el.remove();
-      expect(spy).toHaveBeenCalledWith("click", expect.any(Function));
+      expect(spy).toHaveBeenCalledWith("change", expect.any(Function));
     });
   });
 });

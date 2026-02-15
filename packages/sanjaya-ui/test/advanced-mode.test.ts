@@ -3,16 +3,16 @@
 // ---------------------------------------------------------------------------
 
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { ColumnType } from "../src/types/columns.js";
-import type { ColumnMeta } from "../src/types/columns.js";
+import { ColumnType } from "../src/types/columns";
+import type { ColumnMeta } from "../src/types/columns";
 import {
   FilterOperator,
   FilterCombinator,
-} from "../src/types/filters.js";
-import type { FilterGroup, FilterCondition } from "../src/types/filters.js";
+} from "../src/types/filters";
+import type { FilterGroup, FilterCondition } from "../src/types/filters";
 
 import "../src/filter-builder/advanced/advanced-mode.js";
-import { SanjayaFilterAdvanced } from "../src/filter-builder/advanced/advanced-mode.js";
+import { SanjayaFilterAdvanced } from "../src/filter-builder/advanced/advanced-mode";
 
 // ---------------------------------------------------------------------------
 // Fixtures

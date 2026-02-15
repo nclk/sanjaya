@@ -90,21 +90,20 @@
     font-size: var(--sanjaya-font-size-md, 1rem);
   }
 
-  /* ---- AG Grid theme bridge ---- */
-  .grid-panel :global(.ag-theme-quartz),
-  .grid-panel .ag-theme-quartz {
-    --ag-font-family: var(--sanjaya-font-family, system-ui, sans-serif);
-    --ag-foreground-color: var(--sanjaya-color-on-surface, #333);
-    --ag-background-color: var(--sanjaya-color-surface, #fff);
-    --ag-header-background-color: var(--sanjaya-color-surface, #fff);
-    --ag-border-color: var(--sanjaya-color-border, #e0e0e0);
-    --ag-selected-row-background-color: var(--sanjaya-color-primary-hover, rgba(25, 118, 210, 0.08));
-    --ag-range-selection-border-color: var(--sanjaya-color-primary, #1976d2);
-    --ag-row-hover-color: var(--sanjaya-color-primary-hover, rgba(25, 118, 210, 0.04));
-    --ag-alpine-active-color: var(--sanjaya-color-primary, #1976d2);
-    --ag-border-radius: var(--sanjaya-radius-sm, 4px);
+  /*
+   * Slotted grid containers live in the light DOM so that host-level
+   * AG Grid CSS (and any host customisations) apply naturally.
+   * We only need to ensure they fill the panel.
+   */
+  ::slotted([slot="grid-table"]),
+  ::slotted([slot="grid-pivot"]) {
     width: 100%;
     height: 100%;
+    display: none;
+  }
+
+  ::slotted([data-grid-visible]) {
+    display: block;
   }
 </style>
 
@@ -119,13 +118,13 @@
       <div class="grid-placeholder" id="placeholder-table">
         Select a dataset to view data
       </div>
-      <div id="grid-table" class="ag-theme-quartz" style="width:100%;height:100%;display:none;"></div>
+      <slot name="grid-table"></slot>
     </div>
     <div class="grid-panel" id="panel-pivot" role="tabpanel">
       <div class="grid-placeholder" id="placeholder-pivot">
         Configure pivot settings to view data
       </div>
-      <div id="grid-pivot" class="ag-theme-quartz" style="width:100%;height:100%;display:none;"></div>
+      <slot name="grid-pivot"></slot>
     </div>
   </div>
 </div>

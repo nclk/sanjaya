@@ -5,9 +5,9 @@
 // `action-select` when the user clicks an enabled item.
 // ---------------------------------------------------------------------------
 
-import { emit } from "../../shared/events.js";
-import { template } from "./template.js";
-import type { MenuActionItem, MenuAction } from "../helpers.js";
+import { emit } from "../../shared/events";
+import { template } from "./template";
+import type { MenuActionItem, MenuAction } from "../helpers";
 
 const tpl = document.createElement("template");
 tpl.innerHTML = template;

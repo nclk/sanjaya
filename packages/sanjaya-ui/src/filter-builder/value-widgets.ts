@@ -5,11 +5,11 @@
 // condition rows. Used by both basic and advanced mode components.
 // ---------------------------------------------------------------------------
 
-import type { ColumnMeta } from "../types/columns.js";
-import { ColumnType } from "../types/columns.js";
-import { FilterOperator, FilterStyle } from "../types/filters.js";
-import type { BasicRow } from "./helpers.js";
-import { NULL_OPERATORS, inputTypeForColumn } from "./helpers.js";
+import type { ColumnMeta } from "../types/columns";
+import { ColumnType } from "../types/columns";
+import { FilterOperator, FilterStyle } from "../types/filters";
+import type { BasicRow } from "./helpers";
+import { NULL_OPERATORS, inputTypeForColumn } from "./helpers";
 
 // ---------------------------------------------------------------------------
 // Render

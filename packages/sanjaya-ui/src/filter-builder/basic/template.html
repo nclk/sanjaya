@@ -6,6 +6,36 @@
     color: var(--sanjaya-color-on-surface, #212121);
   }
 
+  /* ---- Toolbar --------------------------------------------------------- */
+
+  .toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-bottom: var(--sanjaya-spacing-sm, 8px);
+    gap: var(--sanjaya-spacing-sm, 8px);
+  }
+
+  .toggle-label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sanjaya-spacing-xs, 4px);
+    font-size: var(--sanjaya-font-size-sm, 0.8125rem);
+    color: var(--sanjaya-color-on-surface-secondary, #616161);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .toggle-label input[type="checkbox"] {
+    accent-color: var(--sanjaya-color-primary, #1976d2);
+    cursor: pointer;
+  }
+
+  .active-count {
+    font-size: var(--sanjaya-font-size-xs, 0.6875rem);
+    color: var(--sanjaya-color-on-surface-secondary, #616161);
+  }
+
   /* ---- Condition row --------------------------------------------------- */
 
   .condition-row {
@@ -41,13 +71,20 @@
     min-width: 100px;
   }
 
-  .col-select {
-    flex: 1;
-    min-width: 120px;
+  .col-label {
+    flex-shrink: 0;
+    min-width: 100px;
+    font-weight: var(--sanjaya-font-weight-medium, 500);
+    font-size: var(--sanjaya-font-size-sm, 0.8125rem);
+    color: var(--sanjaya-color-on-surface, #212121);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .op-select {
     min-width: 90px;
+    flex-shrink: 0;
   }
 
   .value-input {
@@ -80,55 +117,13 @@
     flex-shrink: 0;
   }
 
-  /* ---- Buttons --------------------------------------------------------- */
+  /* ---- Empty state ------------------------------------------------------ */
 
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--sanjaya-spacing-xs, 4px) var(--sanjaya-spacing-sm, 8px);
-    border: 1px solid var(--sanjaya-color-border, #e0e0e0);
-    border-radius: var(--sanjaya-radius-sm, 4px);
-    font-family: inherit;
-    font-size: var(--sanjaya-font-size-sm, 0.8125rem);
-    cursor: pointer;
-    background: var(--sanjaya-color-surface, #ffffff);
-    color: var(--sanjaya-color-on-surface, #212121);
-    transition: background var(--sanjaya-transition-fast, 120ms ease-in-out),
-                border-color var(--sanjaya-transition-fast, 120ms ease-in-out);
-  }
-
-  .btn:hover {
-    background: var(--sanjaya-color-surface-variant, #f5f5f5);
-    border-color: var(--sanjaya-color-border-hover, #bdbdbd);
-  }
-
-  .btn-sm {
-    padding: 2px var(--sanjaya-spacing-xs, 4px);
-    font-size: var(--sanjaya-font-size-xs, 0.6875rem);
-  }
-
-  .btn-icon {
-    padding: var(--sanjaya-spacing-xs, 4px);
-    border: none;
-    background: transparent;
+  .empty-state {
+    padding: var(--sanjaya-spacing-lg, 16px) 0;
+    text-align: center;
     color: var(--sanjaya-color-on-surface-secondary, #616161);
-    border-radius: var(--sanjaya-radius-sm, 4px);
-    line-height: 1;
-  }
-
-  .btn-icon:hover {
-    background: var(--sanjaya-color-surface-variant, #f5f5f5);
-    color: var(--sanjaya-color-on-surface, #212121);
-  }
-
-  .btn-danger {
-    color: var(--sanjaya-color-error, #d32f2f);
-  }
-
-  .btn-danger:hover {
-    background: color-mix(in srgb, var(--sanjaya-color-error, #d32f2f) 8%, transparent);
-    color: var(--sanjaya-color-error, #d32f2f);
+    font-size: var(--sanjaya-font-size-sm, 0.8125rem);
   }
 
   /* ---- Multi-select ---------------------------------------------------- */
@@ -184,19 +179,25 @@
   }
 </style>
 
+<div class="toolbar">
+  <span class="active-count" id="active-count"></span>
+  <label class="toggle-label">
+    <input type="checkbox" id="toggle-active-only" />
+    Active only
+  </label>
+</div>
 <div id="conditions">
   <!-- condition rows rendered dynamically -->
 </div>
-<button class="btn btn-sm" id="btn-add-condition">+ Add filter</button>
+<div class="empty-state" id="empty-state" hidden>No active filters</div>
 
 <!-- Template: condition row -->
 <template id="condition-row-tpl">
   <div class="condition-row">
-    <select class="col-select" aria-label="Column"></select>
+    <span class="col-label"></span>
     <select class="op-select" aria-label="Operator"></select>
     <div class="value-input">
       <!-- value widget rendered dynamically -->
     </div>
-    <button class="btn btn-icon btn-danger remove-condition" title="Remove filter" aria-label="Remove filter">✕</button>
   </div>
 </template>

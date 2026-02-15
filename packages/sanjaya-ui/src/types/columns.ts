@@ -112,6 +112,6 @@ export interface ColumnMeta {
 }
 
 // Re-export filter enums used by ColumnMeta for convenience
-import type { FilterOperator, FilterStyle } from "./filters.js";
-import type { AggFunc } from "./ssrm.js";
+import type { FilterOperator, FilterStyle } from "./filters";
+import type { AggFunc } from "./ssrm";
 export type { FilterOperator, FilterStyle, AggFunc };

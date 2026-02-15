@@ -6,24 +6,24 @@
 // child zone events.
 // ---------------------------------------------------------------------------
 
-import type { SanjayaDataClient } from "../types/client.js";
-import type { ColumnMeta } from "../types/columns.js";
-import type { AggFunc } from "../types/ssrm.js";
-import { DirtyTracker } from "../shared/state.js";
-import { emit } from "../shared/events.js";
-import { template } from "./template.js";
+import type { SanjayaDataClient } from "../types/client";
+import type { ColumnMeta } from "../types/columns";
+import type { AggFunc } from "../types/ssrm";
+import { DirtyTracker } from "../shared/state";
+import { emit } from "../shared/events";
+import { template } from "./template";
 
 // Import sub-component (side-effect: registers custom element)
 import "./zone-panel/zone-panel.js";
-import type { SanjayaPivotZone } from "./zone-panel/zone-panel.js";
+import type { SanjayaPivotZone } from "./zone-panel/zone-panel";
 import type {
   ZoneAddDetail,
   ZoneRemoveDetail,
   ZoneReorderDetail,
   ZoneAggChangeDetail,
-} from "./zone-panel/zone-panel.js";
+} from "./zone-panel/zone-panel";
 
-import type { PivotConfig } from "./helpers.js";
+import type { PivotConfig } from "./helpers";
 import {
   emptyPivotConfig,
   columnVOFromMeta,
@@ -33,7 +33,7 @@ import {
   removeFromZone,
   reorderInZone,
   updateAggFunc,
-} from "./helpers.js";
+} from "./helpers";
 
 const tpl = document.createElement("template");
 tpl.innerHTML = template;

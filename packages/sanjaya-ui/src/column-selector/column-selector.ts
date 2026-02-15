@@ -2,11 +2,11 @@
 // <sj-column-selector> — reorderable column checklist with isGroup toggle
 // ---------------------------------------------------------------------------
 
-import type { SanjayaDataClient } from "../types/client.js";
-import type { ColumnMeta } from "../types/columns.js";
-import { DirtyTracker } from "../shared/state.js";
-import { emit } from "../shared/events.js";
-import { template } from "./template.js";
+import type { SanjayaDataClient } from "../types/client";
+import type { ColumnMeta } from "../types/columns";
+import { DirtyTracker } from "../shared/state";
+import { emit } from "../shared/events";
+import { template } from "./template";
 
 const tpl = document.createElement("template");
 tpl.innerHTML = template;

@@ -3,15 +3,15 @@
 // ---------------------------------------------------------------------------
 
 import { describe, it, expect, afterEach } from "vitest";
-import { ColumnType } from "../src/types/columns.js";
-import type { ColumnMeta } from "../src/types/columns.js";
-import { FilterOperator, FilterStyle } from "../src/types/filters.js";
-import type { BasicRow } from "../src/filter-builder/helpers.js";
+import { ColumnType } from "../src/types/columns";
+import type { ColumnMeta } from "../src/types/columns";
+import { FilterOperator, FilterStyle } from "../src/types/filters";
+import type { BasicRow } from "../src/filter-builder/helpers";
 import {
   renderValueWidget,
   readValueFromRow,
   readConditionValue,
-} from "../src/filter-builder/value-widgets.js";
+} from "../src/filter-builder/value-widgets";
 
 // ---------------------------------------------------------------------------
 // Helpers

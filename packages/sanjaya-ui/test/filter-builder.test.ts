@@ -3,21 +3,21 @@
 // ---------------------------------------------------------------------------
 
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
-import { ColumnType } from "../src/types/columns.js";
-import type { ColumnMeta } from "../src/types/columns.js";
-import type { SanjayaDataClient } from "../src/types/client.js";
+import { ColumnType } from "../src/types/columns";
+import type { ColumnMeta } from "../src/types/columns";
+import type { SanjayaDataClient } from "../src/types/client";
 import {
   FilterOperator,
   FilterCombinator,
   emptyFilterGroup,
-} from "../src/types/filters.js";
-import type { FilterGroup } from "../src/types/filters.js";
+} from "../src/types/filters";
+import type { FilterGroup } from "../src/types/filters";
 
 import "../src/filter-builder/filter-builder.js";
-import { SanjayaFilterBuilder } from "../src/filter-builder/filter-builder.js";
-import type { FilterMode } from "../src/filter-builder/filter-builder.js";
-import type { SanjayaFilterBasic } from "../src/filter-builder/basic/basic-mode.js";
-import type { SanjayaFilterAdvanced } from "../src/filter-builder/advanced/advanced-mode.js";
+import { SanjayaFilterBuilder } from "../src/filter-builder/filter-builder";
+import type { FilterMode } from "../src/filter-builder/filter-builder";
+import type { SanjayaFilterBasic } from "../src/filter-builder/basic/basic-mode";
+import type { SanjayaFilterAdvanced } from "../src/filter-builder/advanced/advanced-mode";
 
 // ---------------------------------------------------------------------------
 // Fixtures

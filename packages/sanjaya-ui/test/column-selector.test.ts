@@ -3,17 +3,17 @@
 // ---------------------------------------------------------------------------
 
 import { describe, it, expect, vi, afterEach } from "vitest";
-import type { SanjayaDataClient } from "../src/types/client.js";
-import type { ColumnMeta } from "../src/types/columns.js";
-import { ColumnType } from "../src/types/columns.js";
-import { FilterOperator } from "../src/types/filters.js";
+import type { SanjayaDataClient } from "../src/types/client";
+import type { ColumnMeta } from "../src/types/columns";
+import { ColumnType } from "../src/types/columns";
+import { FilterOperator } from "../src/types/filters";
 import type {
   ColumnSelection,
   ColumnsChangeDetail,
-} from "../src/column-selector/column-selector.js";
+} from "../src/column-selector/column-selector";
 
 import "../src/column-selector/column-selector.js";
-import { SanjayaColumnSelector } from "../src/column-selector/column-selector.js";
+import { SanjayaColumnSelector } from "../src/column-selector/column-selector";
 
 // ---------------------------------------------------------------------------
 // Fixtures

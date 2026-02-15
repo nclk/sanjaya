@@ -3,11 +3,11 @@
 // ---------------------------------------------------------------------------
 
 import { describe, it, expect, vi, afterEach } from "vitest";
-import type { MenuActionItem, MenuAction } from "../src/report-builder/helpers.js";
-import type { ActionSelectDetail } from "../src/report-builder/actions-menu/actions-menu.js";
+import type { MenuActionItem, MenuAction } from "../src/report-builder/helpers";
+import type { ActionSelectDetail } from "../src/report-builder/actions-menu/actions-menu";
 
 import "../src/report-builder/actions-menu/actions-menu.js";
-import { SanjayaActionsMenu } from "../src/report-builder/actions-menu/actions-menu.js";
+import { SanjayaActionsMenu } from "../src/report-builder/actions-menu/actions-menu";
 
 // ---------------------------------------------------------------------------
 // Fixtures

@@ -1,0 +1,169 @@
+/* ── Sanjaya vanilla-TS demo ─────────────────────────────────────────── */
+@import "@pojagi/sanjaya-ui/themes/light.css";
+
+/* ---- Reset ----------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  font-family: var(--sanjaya-font-family);
+  font-size: var(--sanjaya-font-size-md);
+  line-height: var(--sanjaya-line-height);
+  color: var(--sanjaya-color-on-surface);
+  background: var(--sanjaya-color-background);
+}
+
+/* ---- Shell layout: sidebar | main ----------------------------------- */
+body {
+  display: flex;
+  overflow: hidden;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────────────── */
+.sidebar {
+  display: flex;
+  flex-shrink: 0;
+  height: 100%;
+  background: var(--sanjaya-color-surface);
+  border-right: 1px solid var(--sanjaya-color-border);
+  transition: width var(--sanjaya-transition-normal);
+  position: relative;
+}
+
+.sidebar.collapsed {
+  width: 44px; /* just enough for the tab strip */
+}
+
+.sidebar.expanded {
+  width: var(--sidebar-width, 360px);
+}
+
+/* ── Vertical tab strip ──────────────────────────────────────────────── */
+.tab-strip {
+  display: flex;
+  flex-direction: column;
+  width: 44px;
+  flex-shrink: 0;
+  background: var(--sanjaya-color-surface-variant);
+  border-right: 1px solid var(--sanjaya-color-border);
+  padding-top: var(--sanjaya-spacing-sm);
+  gap: var(--sanjaya-spacing-xs);
+}
+
+.strip-tab {
+  all: unset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+  border-radius: var(--sanjaya-radius-sm);
+  margin: 0 var(--sanjaya-spacing-xxs);
+  transition: background var(--sanjaya-transition-fast);
+}
+
+.strip-tab .strip-label {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  font-size: var(--sanjaya-font-size-sm);
+  font-weight: var(--sanjaya-font-weight-medium);
+  color: var(--sanjaya-color-on-surface-secondary);
+  user-select: none;
+}
+
+.strip-tab:hover {
+  background: var(--sanjaya-color-border);
+}
+
+.strip-tab[aria-selected="true"] {
+  background: var(--sanjaya-color-primary);
+}
+
+.strip-tab[aria-selected="true"] .strip-label {
+  color: var(--sanjaya-color-primary-text);
+}
+
+.strip-tab:focus-visible {
+  outline: 2px solid var(--sanjaya-color-primary);
+  outline-offset: -2px;
+}
+
+/* ── Panel area (holds one visible panel at a time) ───────────────────── */
+.panel-area {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sidebar.collapsed .panel-area {
+  display: none;
+}
+
+.panel-area > .panel {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panel-area > .panel[hidden] {
+  display: none !important;
+}
+
+/* Force child custom-elements to fill the panel */
+.panel-area > .panel > * {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ── Resize handle ────────────────────────────────────────────────────── */
+.resize-handle {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  cursor: col-resize;
+  background: transparent;
+  transition: background var(--sanjaya-transition-fast);
+  z-index: 10;
+}
+
+.resize-handle:hover,
+.resize-handle.dragging {
+  background: var(--sanjaya-color-primary);
+}
+
+.sidebar.collapsed .resize-handle {
+  display: none;
+}
+
+/* ── Main content area ────────────────────────────────────────────────── */
+.main {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+sj-data-grid {
+  flex: 1;
+  min-height: 0;
+}

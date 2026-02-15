@@ -7,13 +7,19 @@
  */
 export const template = `<style>
   :host {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
     font-family: var(--sanjaya-font-family, sans-serif);
     font-size: var(--sanjaya-font-size-md, 0.875rem);
     color: var(--sanjaya-color-on-surface, #212121);
   }
 
   .panel {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 1;
     background: var(--sanjaya-color-surface, #ffffff);
     border: 1px solid var(--sanjaya-color-border, #e0e0e0);
     border-radius: var(--sanjaya-radius-md, 6px);
@@ -46,6 +52,10 @@ export const template = `<style>
   }
 
   .panel-body {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
     padding: var(--sanjaya-spacing-md, 12px) var(--sanjaya-spacing-lg, 16px);
   }
 
@@ -96,7 +106,8 @@ export const template = `<style>
     list-style: none;
     margin: 0;
     padding: 0;
-    max-height: 240px;
+    flex: 1;
+    min-height: 0;
     overflow-y: auto;
   }
 

@@ -9,16 +9,16 @@
 //   2. Report-level — applied state vs. last-saved snapshot
 // ---------------------------------------------------------------------------
 
-import type { SanjayaDataClient } from "../types/client.js";
+import type { SanjayaDataClient } from "../types/client";
 import type {
   DynamicReport,
   DynamicReportDefinition,
   DynamicReportAction,
-} from "../types/reports.js";
-import type { DatasetCapabilities } from "../types/datasets.js";
-import { emptyFilterGroup } from "../types/filters.js";
-import { emit } from "../shared/events.js";
-import { template } from "./template.js";
+} from "../types/reports";
+import type { DatasetCapabilities } from "../types/datasets";
+import { emptyFilterGroup } from "../types/filters";
+import { emit } from "../shared/events";
+import { template } from "./template";
 
 // Import child components (side-effect: registers custom elements)
 import "../dataset-picker/dataset-picker.js";
@@ -27,18 +27,18 @@ import "../filter-builder/filter-builder.js";
 import "../pivot-config/pivot-config.js";
 import "./actions-menu/actions-menu.js";
 
-import type { SanjayaDatasetPicker } from "../dataset-picker/dataset-picker.js";
-import type { DatasetChangeDetail } from "../dataset-picker/dataset-picker.js";
-import type { SanjayaColumnSelector } from "../column-selector/column-selector.js";
-import type { ColumnsChangeDetail } from "../column-selector/column-selector.js";
-import type { SanjayaFilterBuilder } from "../filter-builder/filter-builder.js";
-import type { FilterChangeDetail } from "../filter-builder/filter-builder.js";
-import type { SanjayaPivotConfig } from "../pivot-config/pivot-config.js";
-import type { PivotConfigChangeDetail } from "../pivot-config/pivot-config.js";
-import type { SanjayaActionsMenu } from "./actions-menu/actions-menu.js";
-import type { ActionSelectDetail } from "./actions-menu/actions-menu.js";
+import type { SanjayaDatasetPicker } from "../dataset-picker/dataset-picker";
+import type { DatasetChangeDetail } from "../dataset-picker/dataset-picker";
+import type { SanjayaColumnSelector } from "../column-selector/column-selector";
+import type { ColumnsChangeDetail } from "../column-selector/column-selector";
+import type { SanjayaFilterBuilder } from "../filter-builder/filter-builder";
+import type { FilterChangeDetail } from "../filter-builder/filter-builder";
+import type { SanjayaPivotConfig } from "../pivot-config/pivot-config";
+import type { PivotConfigChangeDetail } from "../pivot-config/pivot-config";
+import type { SanjayaActionsMenu } from "./actions-menu/actions-menu";
+import type { ActionSelectDetail } from "./actions-menu/actions-menu";
 
-import type { ReportBuilderState } from "./helpers.js";
+import type { ReportBuilderState } from "./helpers";
 import {
   emptyBuilderState,
   stateToDefinition,
@@ -46,8 +46,8 @@ import {
   buildActionMenu,
   hasNonDefaultState,
   isReportDirty,
-} from "./helpers.js";
-import { emptyPivotConfig } from "../pivot-config/helpers.js";
+} from "./helpers";
+import { emptyPivotConfig } from "../pivot-config/helpers";
 
 const tpl = document.createElement("template");
 tpl.innerHTML = template;

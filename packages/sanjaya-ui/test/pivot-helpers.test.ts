@@ -3,10 +3,10 @@
 // ---------------------------------------------------------------------------
 
 import { describe, it, expect } from "vitest";
-import { ColumnType } from "../src/types/columns.js";
-import type { ColumnMeta } from "../src/types/columns.js";
-import { AggFunc } from "../src/types/ssrm.js";
-import type { ColumnVO } from "../src/types/ssrm.js";
+import { ColumnType } from "../src/types/columns";
+import type { ColumnMeta } from "../src/types/columns";
+import { AggFunc } from "../src/types/ssrm";
+import type { ColumnVO } from "../src/types/ssrm";
 import {
   emptyPivotConfig,
   columnVOFromMeta,
@@ -21,9 +21,9 @@ import {
   reorderInZone,
   updateAggFunc,
   AGG_LABELS,
-} from "../src/pivot-config/helpers.js";
-import type { PivotConfig } from "../src/pivot-config/helpers.js";
-import { FilterOperator } from "../src/types/filters.js";
+} from "../src/pivot-config/helpers";
+import type { PivotConfig } from "../src/pivot-config/helpers";
+import { FilterOperator } from "../src/types/filters";
 
 // ---------------------------------------------------------------------------
 // Fixtures

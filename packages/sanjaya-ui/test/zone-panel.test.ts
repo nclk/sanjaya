@@ -3,19 +3,19 @@
 // ---------------------------------------------------------------------------
 
 import { describe, it, expect, vi, afterEach } from "vitest";
-import type { ColumnMeta } from "../src/types/columns.js";
-import { ColumnType } from "../src/types/columns.js";
-import { AggFunc } from "../src/types/ssrm.js";
-import type { ColumnVO } from "../src/types/ssrm.js";
-import { FilterOperator } from "../src/types/filters.js";
+import type { ColumnMeta } from "../src/types/columns";
+import { ColumnType } from "../src/types/columns";
+import { AggFunc } from "../src/types/ssrm";
+import type { ColumnVO } from "../src/types/ssrm";
+import { FilterOperator } from "../src/types/filters";
 import type {
   ZoneAddDetail,
   ZoneRemoveDetail,
   ZoneAggChangeDetail,
-} from "../src/pivot-config/zone-panel/zone-panel.js";
+} from "../src/pivot-config/zone-panel/zone-panel";
 
 import "../src/pivot-config/zone-panel/zone-panel.js";
-import { SanjayaPivotZone } from "../src/pivot-config/zone-panel/zone-panel.js";
+import { SanjayaPivotZone } from "../src/pivot-config/zone-panel/zone-panel";
 
 // ---------------------------------------------------------------------------
 // Fixtures

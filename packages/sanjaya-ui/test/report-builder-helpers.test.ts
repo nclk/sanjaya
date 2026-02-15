@@ -3,15 +3,15 @@
 // ---------------------------------------------------------------------------
 
 import { describe, it, expect } from "vitest";
-import { FilterCombinator, FilterOperator } from "../src/types/filters.js";
-import { emptyFilterGroup } from "../src/types/filters.js";
-import { AggFunc } from "../src/types/ssrm.js";
+import { FilterCombinator, FilterOperator } from "../src/types/filters";
+import { emptyFilterGroup } from "../src/types/filters";
+import { AggFunc } from "../src/types/ssrm";
 import {
   DynamicReportAction,
   DynamicReportStatus,
-} from "../src/types/reports.js";
-import type { DynamicReport, DynamicReportDefinition } from "../src/types/reports.js";
-import { emptyPivotConfig } from "../src/pivot-config/helpers.js";
+} from "../src/types/reports";
+import type { DynamicReport, DynamicReportDefinition } from "../src/types/reports";
+import { emptyPivotConfig } from "../src/pivot-config/helpers";
 import {
   emptyBuilderState,
   stateToDefinition,
@@ -19,8 +19,8 @@ import {
   buildActionMenu,
   hasNonDefaultState,
   isReportDirty,
-} from "../src/report-builder/helpers.js";
-import type { ReportBuilderState } from "../src/report-builder/helpers.js";
+} from "../src/report-builder/helpers";
+import type { ReportBuilderState } from "../src/report-builder/helpers";
 
 // ---------------------------------------------------------------------------
 // Fixtures

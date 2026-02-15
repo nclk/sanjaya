@@ -2,18 +2,18 @@
 // <sj-filter-advanced> — recursive FilterGroup tree editor
 // ---------------------------------------------------------------------------
 
-import type { ColumnMeta } from "../../types/columns.js";
+import type { ColumnMeta } from "../../types/columns";
 import {
   FilterOperator,
   FilterCombinator,
   emptyFilterGroup,
-} from "../../types/filters.js";
-import type { FilterCondition, FilterGroup } from "../../types/filters.js";
-import { emit } from "../../shared/events.js";
-import { template } from "./template.js";
-import type { BasicRow } from "../helpers.js";
-import { OPERATOR_LABELS, NULL_OPERATORS } from "../helpers.js";
-import { renderValueWidget, readConditionValue } from "../value-widgets.js";
+} from "../../types/filters";
+import type { FilterCondition, FilterGroup } from "../../types/filters";
+import { emit } from "../../shared/events";
+import { template } from "./template";
+import type { BasicRow } from "../helpers";
+import { OPERATOR_LABELS, NULL_OPERATORS } from "../helpers";
+import { renderValueWidget, readConditionValue } from "../value-widgets";
 
 const tpl = document.createElement("template");
 tpl.innerHTML = template;

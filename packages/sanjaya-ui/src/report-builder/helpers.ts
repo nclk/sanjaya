@@ -2,16 +2,16 @@
 // Report-builder shared types and pure helper functions
 // ---------------------------------------------------------------------------
 
-import type { ColumnSelection } from "../column-selector/column-selector.js";
-import type { FilterGroup } from "../types/filters.js";
-import { emptyFilterGroup } from "../types/filters.js";
-import type { PivotConfig } from "../pivot-config/helpers.js";
-import { emptyPivotConfig } from "../pivot-config/helpers.js";
+import type { ColumnSelection } from "../column-selector/column-selector";
+import type { FilterGroup } from "../types/filters";
+import { emptyFilterGroup } from "../types/filters";
+import type { PivotConfig } from "../pivot-config/helpers";
+import { emptyPivotConfig } from "../pivot-config/helpers";
 import type {
   DynamicReport,
   DynamicReportDefinition,
   DynamicReportAction,
-} from "../types/reports.js";
+} from "../types/reports";
 
 // ---------------------------------------------------------------------------
 // State shape

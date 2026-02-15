@@ -8,13 +8,13 @@ import {
   FormatHintKind,
   FilterCombinator,
   FilterOperator,
-} from "../src/types/index.js";
-import type { ColumnMeta } from "../src/types/columns.js";
-import type { FilterGroup } from "../src/types/filters.js";
-import type { DynamicReportDefinition } from "../src/types/reports.js";
-import type { PivotResultColDef } from "../src/types/ssrm.js";
-import { AggFunc } from "../src/types/ssrm.js";
-import type { SSRMGetRowsParams } from "../src/data-grid/helpers.js";
+} from "../src/types/index";
+import type { ColumnMeta } from "../src/types/columns";
+import type { FilterGroup } from "../src/types/filters";
+import type { DynamicReportDefinition } from "../src/types/reports";
+import type { PivotResultColDef } from "../src/types/ssrm";
+import { AggFunc } from "../src/types/ssrm";
+import type { SSRMGetRowsParams } from "../src/data-grid/helpers";
 import {
   columnMetaToColDef,
   tableColDefs,
@@ -23,7 +23,7 @@ import {
   buildPivotRequest,
   hasFilter,
   isPivotReady,
-} from "../src/data-grid/helpers.js";
+} from "../src/data-grid/helpers";
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -211,9 +211,14 @@ describe("tableColDefs", () => {
     expect(defs[0].headerName).toBe("unknown_col");
   });
 
-  it("returns empty for no selected columns", () => {
+  it("returns all columns when none are explicitly selected", () => {
     const def = makeDefinition({ selectedColumns: [] });
-    expect(tableColDefs(def, columns)).toHaveLength(0);
+    const defs = tableColDefs(def, columns);
+    expect(defs).toHaveLength(columns.length);
+    expect(defs[0].colId).toBe("order_id");
+    expect(defs[1].colId).toBe("customer");
+    expect(defs[2].colId).toBe("amount");
+    expect(defs[3].colId).toBe("hidden");
   });
 });
 

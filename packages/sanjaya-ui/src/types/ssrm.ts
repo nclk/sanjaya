@@ -2,7 +2,7 @@
 // AG Grid SSRM types — mirror sanjaya_django.schemas.ssrm / pivot / export
 // ---------------------------------------------------------------------------
 
-import type { ColumnType } from "./columns.js";
+import type { ColumnType } from "./columns";
 
 // ---------------------------------------------------------------------------
 // Aggregate function enum

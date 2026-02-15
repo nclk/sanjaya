@@ -4,17 +4,17 @@
 // These functions are framework-free and fully unit-testable.
 // ---------------------------------------------------------------------------
 
-import type { ColumnMeta } from "../types/columns.js";
-import { ColumnType, FormatHintKind } from "../types/columns.js";
+import type { ColumnMeta } from "../types/columns";
+import { ColumnType, FormatHintKind } from "../types/columns";
 import type {
   ColumnVO,
   SortModelItem,
   TableSSRMRequest,
   PivotSSRMRequest,
   PivotResultColDef,
-} from "../types/ssrm.js";
-import type { DynamicReportDefinition } from "../types/reports.js";
-import type { FilterGroup } from "../types/filters.js";
+} from "../types/ssrm";
+import type { DynamicReportDefinition } from "../types/reports";
+import type { FilterGroup } from "../types/filters";
 
 // ---------------------------------------------------------------------------
 // AG Grid type stand-ins
@@ -137,6 +137,11 @@ export function tableColDefs(
   definition: DynamicReportDefinition,
   columnsMeta: ColumnMeta[],
 ): GridColDef[] {
+  // When no columns are explicitly selected, show all available columns
+  if (definition.selectedColumns.length === 0) {
+    return columnsMeta.map(columnMetaToColDef);
+  }
+
   const lookup = new Map(columnsMeta.map((c) => [c.name, c]));
   return definition.selectedColumns
     .map((name) => {

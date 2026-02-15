@@ -3,25 +3,25 @@
 // ---------------------------------------------------------------------------
 
 import { describe, it, expect, vi, afterEach } from "vitest";
-import type { SanjayaDataClient } from "../src/types/client.js";
-import type { DynamicReport } from "../src/types/reports.js";
+import type { SanjayaDataClient } from "../src/types/client";
+import type { DynamicReport } from "../src/types/reports";
 import {
   DynamicReportStatus,
   DynamicReportAction,
-} from "../src/types/reports.js";
-import { FilterCombinator, FilterOperator } from "../src/types/filters.js";
-import { AggFunc } from "../src/types/ssrm.js";
-import type { DatasetChangeDetail } from "../src/dataset-picker/dataset-picker.js";
-import type { ColumnsChangeDetail } from "../src/column-selector/column-selector.js";
-import type { FilterChangeDetail } from "../src/filter-builder/filter-builder.js";
-import type { PivotConfigChangeDetail } from "../src/pivot-config/pivot-config.js";
+} from "../src/types/reports";
+import { FilterCombinator, FilterOperator } from "../src/types/filters";
+import { AggFunc } from "../src/types/ssrm";
+import type { DatasetChangeDetail } from "../src/dataset-picker/dataset-picker";
+import type { ColumnsChangeDetail } from "../src/column-selector/column-selector";
+import type { FilterChangeDetail } from "../src/filter-builder/filter-builder";
+import type { PivotConfigChangeDetail } from "../src/pivot-config/pivot-config";
 import type {
   ReportDefinitionChangeDetail,
   ReportActionDetail,
-} from "../src/report-builder/report-builder.js";
+} from "../src/report-builder/report-builder";
 
 import "../src/report-builder/report-builder.js";
-import { SanjayaReportBuilder } from "../src/report-builder/report-builder.js";
+import { SanjayaReportBuilder } from "../src/report-builder/report-builder";
 
 // ---------------------------------------------------------------------------
 // Fixtures

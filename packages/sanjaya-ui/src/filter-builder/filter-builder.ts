@@ -5,19 +5,19 @@
 // switching, Apply / Undo, DirtyTracker, and column loading.
 // ---------------------------------------------------------------------------
 
-import type { SanjayaDataClient } from "../types/client.js";
-import type { ColumnMeta } from "../types/columns.js";
-import { emptyFilterGroup } from "../types/filters.js";
-import type { FilterGroup } from "../types/filters.js";
-import { DirtyTracker } from "../shared/state.js";
-import { emit } from "../shared/events.js";
-import { template } from "./template.js";
+import type { SanjayaDataClient } from "../types/client";
+import type { ColumnMeta } from "../types/columns";
+import { emptyFilterGroup } from "../types/filters";
+import type { FilterGroup } from "../types/filters";
+import { DirtyTracker } from "../shared/state";
+import { emit } from "../shared/events";
+import { template } from "./template";
 
 // Import sub-components (side-effect: registers custom elements)
 import "./basic/basic-mode.js";
 import "./advanced/advanced-mode.js";
-import type { SanjayaFilterBasic } from "./basic/basic-mode.js";
-import type { SanjayaFilterAdvanced } from "./advanced/advanced-mode.js";
+import type { SanjayaFilterBasic } from "./basic/basic-mode";
+import type { SanjayaFilterAdvanced } from "./advanced/advanced-mode";
 
 const tpl = document.createElement("template");
 tpl.innerHTML = template;

@@ -3,13 +3,13 @@
 // ---------------------------------------------------------------------------
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import type { SanjayaDataClient } from "../src/types/client.js";
-import type { DatasetSummary } from "../src/types/datasets.js";
-import type { DatasetChangeDetail } from "../src/dataset-picker/dataset-picker.js";
+import type { SanjayaDataClient } from "../src/types/client";
+import type { DatasetSummary } from "../src/types/datasets";
+import type { DatasetChangeDetail } from "../src/dataset-picker/dataset-picker";
 
 // Import registers the custom element as a side-effect
 import "../src/dataset-picker/dataset-picker.js";
-import { SanjayaDatasetPicker } from "../src/dataset-picker/dataset-picker.js";
+import { SanjayaDatasetPicker } from "../src/dataset-picker/dataset-picker";
 
 // ---------------------------------------------------------------------------
 // Fixtures

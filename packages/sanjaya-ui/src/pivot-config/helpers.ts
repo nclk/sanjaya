@@ -2,9 +2,9 @@
 // Pivot-config shared types, constants, and pure helper functions
 // ---------------------------------------------------------------------------
 
-import type { ColumnMeta } from "../types/columns.js";
-import type { ColumnVO } from "../types/ssrm.js";
-import { AggFunc } from "../types/ssrm.js";
+import type { ColumnMeta } from "../types/columns";
+import type { ColumnVO } from "../types/ssrm";
+import { AggFunc } from "../types/ssrm";
 
 // ---------------------------------------------------------------------------
 // Types

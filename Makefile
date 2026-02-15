@@ -35,7 +35,7 @@ pkg_dir = packages/$(1)
         tsp-build tsp-publish tsp-snapshot \
         mssql-up mssql-down mssql-test \
         postgres-up postgres-down postgres-test \
-        demo-seed demo-migrate demo-server
+        demo-seed demo-migrate demo-server demo-vanilla
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -176,6 +176,11 @@ demo-migrate: ## Run Django migrations (SQLite)
 
 demo-server: ## Run the Django demo server at localhost:8000
 	cd $(DEMO_DIR) && SANJAYA_MSSQL_URL="$(MSSQL_URL)" uv run python manage.py runserver 0.0.0.0:8000
+
+# ── Demo UI (Vite) ───────────────────────────────────────────────
+
+demo-vanilla: ## Run the vanilla-TS demo UI at localhost:5173
+	pnpm --filter @pojagi/demo-vanilla dev
 
 # ── Internal ─────────────────────────────────────────────────────
 

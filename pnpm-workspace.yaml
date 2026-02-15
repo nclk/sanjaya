@@ -2,3 +2,4 @@ packages:
   - "api"
   - "packages/build-templates"
   - "packages/sanjaya-ui"
+  - "apps/demo-vanilla"

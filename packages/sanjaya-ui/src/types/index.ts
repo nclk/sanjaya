@@ -12,7 +12,7 @@ export {
   type PivotAggOption,
   type PivotOptions,
   type ColumnMeta,
-} from "./columns.js";
+} from "./columns";
 
 // Filters
 export {
@@ -22,13 +22,13 @@ export {
   type FilterCondition,
   type FilterGroup,
   emptyFilterGroup,
-} from "./filters.js";
+} from "./filters";
 
 // Datasets
 export {
   type DatasetCapabilities,
   type DatasetSummary,
-} from "./datasets.js";
+} from "./datasets";
 
 // SSRM / AG Grid
 export {
@@ -45,7 +45,7 @@ export {
   type GroupedExportRequest,
   type PivotExportRequest,
   type ExportRequest,
-} from "./ssrm.js";
+} from "./ssrm";
 
 // Reports
 export {
@@ -66,7 +66,7 @@ export {
   type ShareListResponse,
   type UserShareRequest,
   type GroupShareRequest,
-} from "./reports.js";
+} from "./reports";
 
 // Client interface
-export { type SanjayaDataClient } from "./client.js";
+export { type SanjayaDataClient } from "./client";
