@@ -1,4 +1,3 @@
-import "@typespec/http";
 import "./errors.tsp";
 
 namespace Models;

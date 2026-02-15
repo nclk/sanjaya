@@ -17,14 +17,13 @@
     "main.tsp",
     "models/",
     "rest/",
-    "tspconfig.yaml",
     "tsp-output/",
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsp compile .",
-    "watch": "tsp compile . --watch",
-    "prepack": "tsp compile ."
+    "build": "tsp compile compile.tsp",
+    "watch": "tsp compile compile.tsp --watch",
+    "prepack": "tsp compile compile.tsp"
   },
   "packageManager": "pnpm@10.29.3",
   "peerDependencies": {
